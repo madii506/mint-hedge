@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mint on BNB Chain</title>
+<meta name="description" content="Mint is the NFT that hedges against the stock market, now on BNB Chain. Every Mint owns a vault of tokenized gold, dollars and an inverse Nasdaq token.">
+<meta property="og:title" content="Mint on BNB Chain">
+<meta property="og:description" content="The NFT that hedges against the stock market. Its vault holds gold, dollars and a token that rises when the Nasdaq falls.">
+<meta property="og:image" content="https://mint-hedge.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#3fe6a6">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=6">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon.png?v=6">
+<link rel="apple-touch-icon" href="/icon.png?v=6">
+<link rel="preload" href="/assets/fonts/interd-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/bnb.css">
+</head>
+<body class="intro-on bnb">
+
+<canvas id="intro" aria-hidden="true"></canvas>
+
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="#top" aria-label="Mint"><canvas class="leafmark" data-size="22"></canvas><b>Mint</b><span class="chainchip">BNB</span></a>
+  <div class="nav-links">
+    <a href="#why">why</a><a href="#inside">vault</a><a href="#mint">mint</a><a href="#crash">crash</a><a href="#board">board</a><a href="#gallery">gallery</a><a href="#mine">my mints</a><a href="/">Solana</a>
+  </div>
+  <button class="snd" id="snd" aria-label="sound on or off" title="sound"><span></span><span></span><span></span><span></span></button>
+  <button class="btn btn-ink btn-sm" id="connect">connect</button>
+  <div class="scrollbar" aria-hidden="true"><i></i></div>
+</nav>
+
+<main id="top">
+
+<section class="hero" id="hero" data-fx="leaves">
+  <div class="hero-copy">
+    <h1 class="lockup"><canvas class="leafmark" id="heroLeaf" data-size="120"></canvas><span class="wm">Mint</span></h1>
+    <p class="tagline">the NFT that hedges against the stock market <span class="onbnb">on BNB Chain</span></p>
+    <p class="lede">Every Mint owns its own vault: tokenized gold, dollars, and a token that rises when the Nasdaq falls. One approval mints it all. Hold it, sell it with the vault inside, or empty the vault into your wallet whenever you want.</p>
+    <div class="cta">
+      <a class="btn btn-ink" href="#mint">mint yours</a>
+      <a class="btn btn-line" href="#why">why it exists</a>
+    </div>
+  </div>
+  <div class="hero-wall"><canvas id="wall" aria-label="a wall of Wall Street bears"></canvas></div>
+  <a class="scrollcue" href="#why" aria-label="scroll down"><span></span></a>
+</section>
+
+<div class="tape" aria-label="live prices"><div class="tape-in" id="tape"><span>loading live prices…</span></div></div>
+
+<div class="deploybar" id="deploybar" hidden>
+  <div><b>Mint on BNB isn't deployed yet.</b> The contract has no owner, so anyone can put it on-chain with one transaction (a few cents of gas). It lands at the same address whoever sends it: <code id="caddr"></code></div>
+  <button class="btn btn-ink btn-sm" id="deployBtn">deploy it</button>
+</div>
+
+<section class="sec" id="why" data-fx="candles">
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">00 · the problem</span><h2>everything dumps together.</h2></div><div class="sh-r"><p class="sec-lede">When stocks have a bad week, crypto usually has a worse one. BNB Chain is now the biggest home for tokenized stocks, and most bags on it are the same bet: that risk keeps going up. A Mint is the other side of that bet.</p><div class="facts"><div><span>gold · 24h</span><b id="fx-gold">—</b></div><div><span>crash token · 24h</span><b id="fx-short">—</b></div><div><span>BNB · 24h</span><b id="fx-bnb">—</b></div><div><span>network fee</span><b id="fx-fee">—</b></div></div></div></header>
+  <div class="why">
+    <article class="wcard reveal" data-tilt style="--d:0"><span class="wnum">01</span><h3>your wallet is long everything</h3><p>Memecoins, majors and tokenized stocks tend to fall at the same time. When the Nasdaq slides, a wallet full of risk slides with it.</p></article>
+    <article class="wcard reveal" data-tilt style="--d:1"><span class="wnum">02</span><h3>the usual hedge is a chore</h3><p>Shorting needs a broker, margin and a liquidation price. On-chain, almost nobody bothers.</p></article>
+    <article class="wcard reveal" data-tilt style="--d:2"><span class="wnum">03</span><h3>a Mint is the hedge, packaged</h3><p>One NFT that owns gold, dollars and a token that rises when the Nasdaq falls. You can hold it, sell it, or empty it any time.</p></article>
+  </div>
+  <div class="why-live reveal">
+    <div class="wl-head"><span class="kick kick-line">the last 15 days, live</span><span class="wl-src">4-hour closes from PancakeSwap pools via GeckoTerminal</span></div>
+    <div class="wl-row">
+      <div class="wl-stat"><span>crash token (SQQQon)</span><b id="w15spy">—</b></div>
+      <div class="wl-stat"><span>gold (XAUt)</span><b id="w15gold">—</b></div>
+      <div class="wl-stat mint"><span>a 40/30/30 Mint vault</span><b id="w15mint">—</b></div>
+      <canvas id="whySpark" aria-label="15-day crash token vs gold"></canvas>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="inside" data-fx="gold">
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">01 · the vault</span><h2>inside a Mint.</h2></div><div class="sh-r"><p class="sec-lede">The vault is a Tokenbound account (ERC-6551): a smart account that belongs to the NFT. Whoever holds the NFT controls it, and nobody else can, including us.</p><div class="facts"><div><span>vault</span><b>Tokenbound account</b></div><div><span>gold</span><b>XAUt · Tether Gold</b></div><div><span>dollars</span><b>USDT</b></div><div><span>crash token</span><b>SQQQon · Ondo</b></div></div></div></header>
+  <div class="inside">
+    <div class="stack-wrap">
+      <div class="stack" id="stack">
+        <div class="layer l-bet"><canvas data-art="bet"></canvas></div>
+        <div class="layer l-usd"><canvas data-art="usd"></canvas></div>
+        <div class="layer l-gold"><canvas data-art="gold"></canvas></div>
+        <div class="layer l-nft"><canvas data-art="nft"></canvas></div>
+      </div>
+      <div class="legend" aria-hidden="true"><span data-l="nft"><i class="sw sw-ink"></i>the NFT</span><span data-l="gold"><i class="sw sw-gold"></i>gold</span><span data-l="usd"><i class="sw sw-paper"></i>dollars</span><span data-l="bet"><i class="sw sw-coral"></i>crash token</span></div>
+    </div>
+    <div class="inside-r">
+    <ol class="steps">
+      <li class="reveal"><b>The NFT.</b> An ERC-721 called <code>Mint #N</code>. Minting it also creates its vault, a Tokenbound account whose owner is always whoever holds the NFT.</li>
+      <li class="reveal"><b>Gold.</b> Part of your BNB buys XAUt (Tether Gold, one token per troy ounce) through KyberSwap, straight into the vault.</li>
+      <li class="reveal"><b>Dollars.</b> Part buys USDT into the same vault: the calm part that holds still.</li>
+      <li class="reveal"><b>The crash token.</b> Part buys SQQQon, Ondo's token for the ProShares UltraPro Short QQQ fund. It aims to move three times the opposite of the Nasdaq-100 each day, so it rises when tech stocks fall.</li>
+      <li class="reveal"><b>Your call, any time.</b> Empty the vault into your wallet in one transaction, or sell the NFT and the whole vault goes with it.</li>
+    </ol>
+    <div class="chain reveal"><span class="kick">on-chain</span>
+      <a id="lnkContract" href="#" target="_blank" rel="noopener">Mint contract ↗</a>
+      <a href="https://bscscan.com/address/0x000000006551c19487814612e58FE06813775758" target="_blank" rel="noopener">ERC-6551 registry ↗</a>
+      <a href="https://bscscan.com/token/0x21cAef8A43163Eea865baeE23b9C2E327696A3bf" target="_blank" rel="noopener">XAUt ↗</a>
+      <a href="https://bscscan.com/token/0x17515B68378d86C38F394c666e79907dA05dcBA9" target="_blank" rel="noopener">SQQQon ↗</a>
+      <a href="https://bscscan.com/address/0x6131B5fae19EA4f9D964eAc0408E4408b66337b5" target="_blank" rel="noopener">KyberSwap router ↗</a>
+    </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="mint" data-fx="candles">
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">02 · the machine</span><h2>mint one.</h2></div><div class="sh-r"><p class="sec-lede">Pick how much BNB goes in, how big the crash part is and how the rest splits between gold and dollars. Quotes are live from KyberSwap, and one approval in your wallet does the whole thing.</p><div class="facts"><div><span>BNB now</span><b id="fx-bnbp">—</b></div><div><span>mint fee</span><b>none</b></div><div><span>approvals</span><b>1</b></div><div><span>if a swap is short</span><b>it all reverts</b></div></div></div></header>
+  <div class="machine reveal">
+    <div class="m-controls">
+      <div class="field">
+        <div class="f-top"><label for="sol">how much BNB goes in</label><span class="f-val" id="solUsd">—</span></div>
+        <div class="chips" id="solChips"><button data-v="0.02">0.02</button><button data-v="0.05" class="on">0.05</button><button data-v="0.1">0.1</button><button data-v="0.25">0.25</button><input id="sol" type="number" min="0.005" max="20" step="0.005" value="0.05" inputmode="decimal" aria-label="BNB amount"></div>
+        <p class="f-note">Gas on BNB Chain is cents. Everything you send goes into the vault.</p>
+      </div>
+      <div class="field">
+        <div class="f-top"><label for="crashMix">the crash part</label><span class="f-val" id="crashVal">30% of the vault</span></div>
+        <input type="range" id="crashMix" min="0" max="60" step="5" value="30" aria-label="share of the vault in the crash token">
+        <p class="f-note" id="crashNote">This part rises when the Nasdaq-100 falls, about three times the daily drop.</p>
+      </div>
+      <div class="field">
+        <div class="f-top"><label for="mix">the rest: gold or dollars</label><span class="f-val" id="mixVal">60% gold · 40% dollars</span></div>
+        <input type="range" id="mix" min="0" max="100" step="5" value="60" aria-label="gold share of the rest">
+        <div class="mixbar"><i id="mixShort"></i><i id="mixGold"></i><i id="mixUsd"></i></div>
+        <div class="mixlabels"><span>crash · gold · dollars</span><span id="mixPct"></span></div>
+      </div>
+      <div class="mflow">
+        <span class="kick kick-line">one transaction does all of this</span>
+        <ol>
+          <li><b>creates the NFT and its vault.</b> The vault is a Tokenbound account whose address is known before it exists.</li>
+          <li><b>swaps your BNB on KyberSwap</b> into XAUt, USDT and SQQQon, each sent straight into the vault.</li>
+          <li><b>checks every part arrived in full.</b> If one comes up short, the whole mint is undone.</li>
+          <li><b>sends the NFT to your wallet.</b> The vault comes with it.</li>
+        </ol>
+        <div class="mvault" id="mvault">Connect a wallet to see the address your next Mint's vault will have.</div>
+      </div>
+    </div>
+    <div class="m-out">
+      <div class="preview" data-tilt><canvas id="preview" width="560" height="560" aria-label="your Mint"></canvas><span class="pv-tag">the colour comes from your NFT's id</span></div>
+      <div class="vaultviz"><canvas id="vaultViz" aria-label="what goes into the vault"></canvas><div class="vv-l"><span><i class="sw sw-gold"></i>gold</span><span><i class="sw sw-paper"></i>dollars</span><span><i class="sw sw-coral"></i>crash</span></div></div>
+      <dl class="receipt" id="receipt">
+        <div><dt>into the vault, gold</dt><dd id="rGold">—</dd></div>
+        <div><dt>into the vault, dollars</dt><dd id="rUsd">—</dd></div>
+        <div><dt>into the vault, crash token</dt><dd id="rBet">—</dd></div>
+        <div><dt>if the Nasdaq falls 5% in a day</dt><dd id="rPay">—</dd></div>
+      </dl>
+      <button class="btn btn-ink btn-big" id="mintBtn">connect a wallet to mint</button>
+      <ol class="progress" id="progress" hidden></ol>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="crash" data-fx="rain">
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">03 · the payoff</span><h2>when stocks dump.</h2></div><div class="sh-r"><p class="sec-lede">Slide the Nasdaq-100's day and see what each part of a Mint does. The crash token aims for three times the opposite of the index, every day.</p><div class="facts"><div><span>crash token now</span><b id="fx-sq">—</b></div><div><span>its pool depth</span><b id="fx-sqliq">—</b></div><div><span>gold pool depth</span><b id="fx-gliq">—</b></div><div><span>resets</span><b>daily</b></div></div></div></header>
+  <div class="crash">
+    <div class="ladder-wrap reveal">
+      <div class="ladder-top"><span>if the Nasdaq-100 moves</span><b id="touchVal">−5%</b><span>today</span></div>
+      <input type="range" id="touch" min="-20" max="10" step="1" value="-5" aria-label="Nasdaq-100 daily move">
+      <div class="ladder" id="ladder"></div>
+      <p class="fine" id="crashFine">The crash token aims for −3× the Nasdaq-100's return for one day. Gold is held flat here because it doesn't follow stocks.</p>
+    </div>
+    <div class="parts reveal">
+      <div class="part"><h3><i class="sw sw-gold"></i>the gold</h3><p>XAUt tracks one troy ounce of gold. It moves with gold, not with stocks.</p></div>
+      <div class="part"><h3><i class="sw sw-paper"></i>the dollars</h3><p>USDT stays a dollar. It doesn't fall when stocks fall, and it doesn't rise either.</p></div>
+      <div class="part"><h3><i class="sw sw-coral"></i>the crash token</h3><p>SQQQon rises when the Nasdaq-100 falls. It resets every day, so over weeks of choppy markets it loses value even if the index ends flat. It's built for crashes, not for holding forever.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="board" data-fx="grid">
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">04 · live</span><h2>the board.</h2></div><div class="sh-r"><p class="sec-lede">Everything a Mint touches, live from BNB Chain: prices, the last 15 days, the pools behind each part, what's in the vaults and the newest mints.</p><div class="facts"><div><span>mints</span><b id="fx-mints">—</b></div><div><span>held in vaults</span><b id="fx-tvl">—</b></div><div><span>prices</span><b>Dexscreener</b></div><div><span>history</span><b>GeckoTerminal</b></div></div></div></header>
+  <div class="board" id="boardGrid">
+    <div class="bt reveal" data-k="gold" data-tilt><canvas class="bt-art" data-art="goldbar"></canvas><span class="bt-name">gold</span><span class="bt-sub">XAUt · Tether Gold</span><b class="bt-px">—</b><span class="bt-ch">—</span><canvas class="bt-spark" data-h="gold"></canvas><span class="bt-liq">—</span></div>
+    <div class="bt reveal" data-k="short" data-tilt><canvas class="bt-art" data-bear="1"></canvas><span class="bt-name">crash token</span><span class="bt-sub">SQQQon · 3× short Nasdaq-100</span><b class="bt-px">—</b><span class="bt-ch">—</span><canvas class="bt-spark" data-h="spy"></canvas><span class="bt-liq">—</span></div>
+    <div class="bt reveal" data-k="bnb" data-tilt><canvas class="bt-art" data-leaf="1"></canvas><span class="bt-name">BNB</span><span class="bt-sub">what you mint with</span><b class="bt-px">—</b><span class="bt-ch">—</span><span class="bt-liq">—</span></div>
+    <div class="bt reveal" data-k="usd" data-tilt><canvas class="bt-art" data-art="usdtile"></canvas><span class="bt-name">dollars</span><span class="bt-sub">USDT</span><b class="bt-px">—</b><span class="bt-ch">—</span><span class="bt-liq">—</span></div>
+  </div>
+  <div class="bgrid">
+    <div class="bpanel bchart reveal">
+      <div class="bp-head"><h3>15 days: crash token vs gold vs a Mint</h3><div class="bp-leg"><span class="lg spy">crash token</span><span class="lg gold">gold</span><span class="lg mint">40/30/30 Mint vault</span></div></div>
+      <div class="chartbox"><canvas id="chart" aria-label="15-day chart"></canvas><div class="chart-tip" id="chartTip" hidden></div></div>
+      <p class="fine">Percent change from 15 days ago, 4-hour closes of SQQQon/USDT and XAUt/USDT on PancakeSwap (GeckoTerminal). The vault line is 40% gold, 30% dollars and 30% crash token. Past moves say nothing about the next ones.</p>
+    </div>
+    <div class="bpanel bstats reveal">
+      <div class="bp-head"><h3>the vaults</h3></div>
+      <div class="sgrid">
+        <div><b id="bsMints">—</b><span>mints</span></div><div><b id="bsTvl">—</b><span>held in vaults</span></div>
+        <div><b id="bsGold">—</b><span>XAUt in vaults</span></div><div><b id="bsUsd">—</b><span>USDT in vaults</span></div>
+        <div><b id="bsShort">—</b><span>SQQQon in vaults</span></div><div><b id="bsGas">—</b><span>BNB Chain gas now</span></div>
+      </div>
+    </div>
+    <div class="bpanel bpools reveal">
+      <div class="bp-head"><h3>the pools behind it</h3></div>
+      <div id="pools"><div class="skel">loading…</div></div>
+    </div>
+    <div class="bpanel bfeed reveal">
+      <div class="bp-head"><h3>newest mints</h3></div>
+      <div id="feed"><div class="skel">reading the chain…</div></div>
+    </div>
+  </div>
+  <div class="verdict reveal" id="verdict"><span class="v-k">24h</span><b id="verdictTxt">—</b></div>
+  <div class="verdict v2 reveal"><span class="v-k">15d</span><b id="verdict15">—</b></div>
+</section>
+
+<section class="sec" id="gallery" data-fx="parade">
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">05 · every Mint</span><h2>the gallery.</h2></div><div class="sh-r"><p class="sec-lede">Every Mint on BNB Chain, read straight from the contract: who owns it and what its vault holds right now.</p><div class="facts"><div><span>mints</span><b id="fx-mints2">—</b></div><div><span>held in vaults</span><b id="fx-tvl2">—</b></div><div><span>standard</span><b>ERC-721 + 6551</b></div><div><span>source</span><b>the contract</b></div></div></div></header>
+  <div class="gtools reveal"><button class="on" data-sort="new">newest</button><button data-sort="big">biggest vault</button><span id="gcount"></span></div>
+  <div class="gallery" id="galleryGrid"><div class="empty">reading the chain…</div></div>
+</section>
+
+<section class="sec" id="mine" data-fx="leaves">
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">06 · yours</span><h2>my mints.</h2></div><div class="sh-r"><p class="sec-lede">Your Mints and their vaults. Empty a vault into your wallet in one transaction whenever you want; the NFT stays yours.</p><div class="facts"><div><span>empty a vault</span><b>1 transaction</b></div><div><span>who can</span><b>only the NFT's owner</b></div><div><span>sell the NFT</span><b>the vault goes with it</b></div><div><span>custody</span><b>never us</b></div></div></div></header>
+  <div class="mine" id="mineBox"><div class="empty">Connect a wallet on BNB Chain to see your Mints and what their vaults hold. <button class="btn btn-ink btn-sm" data-connect>connect</button></div></div>
+</section>
+
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+<div class="modal" id="walletModal" hidden><div class="modal-card"><h3>connect a wallet</h3><div id="walletList"></div><button class="btn btn-line btn-sm" data-close>close</button></div></div>
+
+<script src="/assets/ethers.umd.min.js" defer></script>
+<script src="/assets/art.js" defer></script>
+<script src="/assets/sound.js" defer></script>
+<script src="/assets/fx.js" defer></script>
+<script src="/assets/bnb.js" defer></script>
+</body>
+</html>

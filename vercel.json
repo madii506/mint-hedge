@@ -1,1 +1,1 @@
-{"regions": ["fra1"], "functions": {"api/mint.js": {"maxDuration": 60}}, "cleanUrls": true}
+{"regions": ["fra1"], "functions": {"api/mint.js": {"maxDuration": 60}, "api/bnb.js": {"maxDuration": 30}}, "cleanUrls": true}
