@@ -42,7 +42,8 @@
   // a bear market rains down and fills the screen; the screen ripples to mint; the bears fall; the leaf builds itself,
   // lands with a shockwave, "mint" drops in letter by letter, and the logo flies into the page
   function intro(done) {
-    const cv = $('#intro'); if (RM || location.hash || scrollY > 10) { cv.remove(); document.body.classList.remove('intro-on'); return done(); }
+    const cv = $('#intro'); if (RM || location.hash || scrollY > 10 || document.hidden) { cv.remove(); document.body.classList.remove('intro-on'); return done(); }
+    setTimeout(() => { if (document.body.contains(cv)) { cv.remove(); document.body.classList.remove('intro-on', 'handoff'); } }, 14000); // never leave the page behind a stuck intro
     history.scrollRestoration = 'manual'; scrollTo(0, 0);
     const W = innerWidth, H = innerHeight, g = sizeCanvas(cv, W, H); cv.style.width = W + 'px'; cv.style.height = H + 'px';
     const r = A.rng(42), ease = t => 1 - Math.pow(1 - t, 3), inOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
