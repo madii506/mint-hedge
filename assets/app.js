@@ -37,59 +37,47 @@
   function drawMarks() { $$('canvas.leafmark').forEach(c => { const wm = c.parentElement.querySelector('.wm'); const css = wm ? Math.round(parseFloat(getComputedStyle(wm).fontSize) * .74) : +c.dataset.size;
     const g = sizeCanvas(c, css * 1.06, css * 1.06); c.style.width = css * 1.06 + 'px'; c.style.height = css * 1.06 + 'px'; A.leaf(g, 0, 0, css, { body: C.ink, rib: C.mintL, shadow: css > 40 ? C.mintS : null }); }); }
 
-  // ---------------------------------------------------------------- the intro (about 5 s), clean: one bear tile drops in and
-  // gets its ▼, flips over into the leaf, the tile falls away, the leaf lands, "mint" drops in letter by letter, the line types
-  // itself, and the logo flies into the page
+  // ---------------------------------------------------------------- the intro (about 4.5 s), smooth and quiet: a bear tile fades in and
+  // gets its ▼, turns over into the leaf, the leaf settles, "Mint" rises in beside it, the line fades in, and the logo glides into the page
   function intro(done) {
     const cv = $('#intro'); if (RM || location.hash || scrollY > 10 || document.hidden) { cv.remove(); document.body.classList.remove('intro-on'); return done(); }
-    setTimeout(() => { if (document.body.contains(cv)) { cv.remove(); document.body.classList.remove('intro-on', 'handoff'); } }, 12000); // never leave the page behind a stuck intro
+    setTimeout(() => { if (document.body.contains(cv)) { cv.remove(); document.body.classList.remove('intro-on', 'handoff'); } }, 11000); // never leave the page behind a stuck intro
     history.scrollRestoration = 'manual'; scrollTo(0, 0);
     const W = innerWidth, H = innerHeight, g = sizeCanvas(cv, W, H); cv.style.width = W + 'px'; cv.style.height = H + 'px';
-    const ease = t => 1 - Math.pow(1 - t, 3), inOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
-    const back = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
-    // the lockup's final size and place (centred), and where the tile sits before it
-    const L = Math.min(W * .17, H * .22), F = L / .74; g.font = `700 ${F}px ID`; const ww = g.measureText('mint').width, gapL = L * .14, lockW = L * 1.06 + gapL + ww;
-    const lx = (W - lockW) / 2, ly = H * .46 - L / 2, cx0 = W / 2, cy0 = H * .46, TS = L * 1.25;
-    const spec = A.bearSpec(A.rng(11)), r = A.rng(7), dust = Array.from({ length: 28 }, () => ({ a: r() * 6.283, v: .3 + r() * .7, s: 3 + Math.floor(r() * 3) * 2 }));
-    const TAG = 'the NFT that hedges against the stock market';
-    let t0 = performance.now(), handoff = null, finished = false, cues = {};
-    const once = (k, n) => { if (!cues[k]) { cues[k] = 1; cue(n); } };
-    const skip = () => { if (!handoff && performance.now() - t0 < 3900) t0 = performance.now() - 3900; };
+    const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), out = t => 1 - Math.pow(1 - t, 3), io = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, sm = t => t * t * (3 - 2 * t);
+    const NAME = 'Mint', TAG = 'the NFT that hedges against the stock market';
+    const L = Math.min(W * .16, H * .21), F = L / .74; g.font = `700 ${F}px ID`; const ww = g.measureText(NAME).width, gapL = L * .14, lockW = L * 1.06 + gapL + ww;
+    const lx = (W - lockW) / 2, ly = H * .46 - L / 2, cx0 = W / 2, cy0 = H * .46, TS = L * 1.2, spec = A.bearSpec(A.rng(11));
+    let t0 = performance.now(), handoff = null, finished = false; const said = {}; const once = (k, n) => { if (!said[k]) { said[k] = 1; cue(n); } };
+    const skip = () => { if (!handoff && performance.now() - t0 < 3500) t0 = performance.now() - 3500; };
     addEventListener('pointerdown', skip, { once: true }); addEventListener('keydown', skip, { once: true });
     function frame(now) {
       const t = now - t0; g.setTransform(DPR, 0, 0, DPR, 0, 0); g.clearRect(0, 0, W, H);
-      if (t > 4300 && !handoff) { const tl = $('#heroLeaf').getBoundingClientRect(); handoff = { t: now, x: tl.left, y: tl.top, s: (tl.width / 1.06) / L }; document.body.classList.add('handoff'); document.body.classList.remove('intro-on'); }
+      if (t > 3900 && !handoff) { const tl = $('#heroLeaf').getBoundingClientRect(); handoff = { t: now, x: tl.left, y: tl.top, s: (tl.width / 1.06) / L }; document.body.classList.add('handoff'); document.body.classList.remove('intro-on'); }
       let bgA = 1, X = lx, Y = ly, sc = 1;
-      if (handoff) { const k = clamp((now - handoff.t) / 950), e = inOut(k); bgA = 1 - clamp((k - .45) / .55); X = lx + (handoff.x - lx) * e; Y = ly + (handoff.y - ly) * e; sc = 1 + (handoff.s - 1) * e;
+      if (handoff) { const k = clamp((now - handoff.t) / 1100), e = io(k); bgA = 1 - sm(clamp((k - .35) / .65)); X = lx + (handoff.x - lx) * e; Y = ly + (handoff.y - ly) * e; sc = 1 + (handoff.s - 1) * e;
         if (k >= 1 && !finished) { finished = true; document.body.classList.remove('handoff'); cv.remove(); return done(); } }
       g.globalAlpha = bgA; g.fillStyle = C.mint; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
-      // 1 · the bear tile drops in, gets its ▼, shivers, flips over
-      if (!handoff && t < 2100) {
-        const kin = clamp(t / 520), drop = (1 - back(kin)) * -H * .25, shake = t > 700 && t < 1050 ? Math.sin(t / 18) * 3 * (1 - (t - 700) / 350) : 0;
-        const kf = clamp((t - 1050) / 520), flip = Math.abs(Math.cos(kf * Math.PI)), front = kf < .5, kOut = clamp((t - 1650) / 450);
-        if (t > 60) { once('in', 'tick'); }
-        g.save(); g.translate(cx0 + shake, cy0 + drop); g.scale(Math.max(.03, kf > 0 && kf < 1 ? flip : 1) * (1 + Math.sin(kin * Math.PI) * .04), 1);
-        g.globalAlpha = 1 - kOut; g.fillStyle = 'rgba(12,21,18,.18)'; A.rr(g, -TS / 2 + TS * .06, -TS / 2 + TS * .08, TS, TS, TS * .18); g.fill(); g.globalAlpha = 1;
-        if (front) A.tile(g, -TS / 2, -TS / 2, TS, C.rows[0], spec, { badge: t > 620, blink: t > 380 && t < 470 });
-        else { g.globalAlpha = 1 - kOut; A.rr(g, -TS / 2 - TS * .05, -TS / 2 - TS * .05, TS * 1.1, TS * 1.1, TS * .21); g.fillStyle = '#fff'; g.fill(); A.rr(g, -TS / 2, -TS / 2, TS, TS, TS * .16); g.fillStyle = C.mintL; g.fill(); g.globalAlpha = 1; }
-        g.restore(); if (t > 620) once('badge', 'pop'); if (kf > .5) once('flip', 'tick'); }
-      // 2 · the leaf: born on the back of the tile, grows to full size, lands with a puff of pixels
-      if (t > 1310) { const kg = clamp((t - 1310) / 700), e = handoff ? 1 : ease(kg), s0 = TS * .62, size = (s0 + (L - s0) * e) * sc;
-        const moveK = handoff ? 1 : inOut(clamp((t - 2150) / 650)), startX = cx0 - size / 2, startY = cy0 - size / 2;
-        const px = handoff ? X : startX + (lx - startX) * moveK, py = handoff ? Y : startY + (ly - startY) * moveK;
-        const landK = clamp((t - 2020) / 900);
-        if (!handoff && landK > 0 && landK < 1) { const R = ease(landK) * L * 1.6; g.strokeStyle = `rgba(12,21,18,${.28 * (1 - landK)})`; g.lineWidth = 6 * (1 - landK) + 1; g.beginPath(); g.arc(px + size / 2, py + size / 2, R, 0, 7); g.stroke();
-          g.fillStyle = C.ink; for (const d of dust) { const dd = ease(landK) * L * 1.3 * d.v; g.globalAlpha = (1 - landK) * .8; g.fillRect(px + size / 2 + Math.cos(d.a) * dd, py + size / 2 + Math.sin(d.a) * dd, d.s, d.s); } g.globalAlpha = 1; once('land', 'chime'); }
-        const flipping = !handoff && t < 1570; if (flipping) { const fl = Math.abs(Math.cos(clamp((t - 1050) / 520) * Math.PI)); g.save(); g.translate(px + size / 2, 0); g.scale(Math.max(.03, fl), 1); g.translate(-(px + size / 2), 0); }
-        const shK = handoff ? 1 : clamp((t - 2000) / 200), off = size * .05; if (shK > 0) { g.globalAlpha = shK; A.leaf(g, px + off * shK, py + off * shK, size, { body: C.mintS, rib: C.mintS, shadow: null }); g.globalAlpha = 1; }
-        A.leaf(g, px, py, size, { body: C.ink, rib: C.mintL, shadow: null }); if (flipping) g.restore();
-        // a shimmer runs up the rib once
-        if (!handoff && t > 2300 && t < 3000) { const k = (t - 2300) / 700, P = size / 16; g.fillStyle = '#ffffff'; for (const [x, y, kk] of A.LEAF) if (kk === 'r' && Math.abs((15 - y) / 15 - k) < .09) g.fillRect(px + x * P, py + y * P, P + .4, P + .4); }
-        // 3 · the name, letter by letter, then the line
+      // 1 · the bear tile: fades up into place, gets its ▼, turns over (0 – 1.5 s)
+      const kf = clamp((t - 950) / 620), turn = io(kf), sx = Math.abs(Math.cos(turn * Math.PI)), back = turn >= .5;
+      if (!handoff && t < 1900) { const kin = out(clamp(t / 650)), fadeOut = sm(clamp((t - 1500) / 380));
+        g.save(); g.globalAlpha = kin * (1 - fadeOut); g.translate(cx0, cy0 + (1 - kin) * 24); g.scale(Math.max(.02, kf > 0 ? sx : 1) * (.92 + .08 * kin), .92 + .08 * kin);
+        if (!back) A.tile(g, -TS / 2, -TS / 2, TS, C.rows[0], spec, { badge: t > 520, blink: t > 380 && t < 460 });
+        else { A.rr(g, -TS / 2 - TS * .05, -TS / 2 - TS * .05, TS * 1.1, TS * 1.1, TS * .21); g.fillStyle = '#fff'; g.fill(); A.rr(g, -TS / 2, -TS / 2, TS, TS, TS * .16); g.fillStyle = C.mintL; g.fill(); }
+        g.restore(); if (t > 520) once('b', 'pop'); }
+      // 2 · the leaf: on the back of the tile, then settling to full size and gliding left to make room for the name
+      if (back || handoff) { const kg = handoff ? 1 : io(clamp((t - 1350) / 750)), s0 = TS * .6, size = (s0 + (L - s0) * kg) * sc;
+        const mk = handoff ? 1 : io(clamp((t - 1900) / 800)), sx0 = cx0 - size / 2, sy0 = cy0 - size / 2, px = handoff ? X : sx0 + (lx - sx0) * mk, py = handoff ? Y : sy0 + (ly - sy0) * mk;
+        const turning = !handoff && kf < 1; if (turning) { g.save(); g.translate(cx0, 0); g.scale(Math.max(.02, sx), 1); g.translate(-cx0, 0); }
+        const shK = handoff ? 1 : sm(clamp((t - 1800) / 500)), off = size * .05;
+        if (shK > 0) { g.globalAlpha = shK; A.leaf(g, px + off * shK, py + off * shK, size, { body: C.mintS, rib: C.mintS, shadow: null }); g.globalAlpha = 1; }
+        A.leaf(g, px, py, size, { body: C.ink, rib: C.mintL, shadow: null }); if (turning) g.restore(); if (kg > .9) once('l', 'chime');
+        // 3 · the name rises in, letter by letter; the line fades in under it
         const fs = F * sc; g.font = `700 ${fs}px ID`; g.textBaseline = 'middle'; g.textAlign = 'left'; let wx = px + (L * 1.06 + gapL) * sc; const wy = py + size * .5 - fs * .04;
-        if (t > 2500 || handoff) [...'mint'].forEach((ch, i) => { const k = handoff ? 1 : clamp((t - 2550 - i * 95) / 360); const cw = g.measureText(ch).width; if (k <= 0) { wx += cw; return; }
-          const e2 = back(k), dy = (1 - e2) * -fs * .45; g.globalAlpha = clamp(k * 2.5); g.fillStyle = C.mintS; g.fillText(ch, wx + fs * .045, wy + dy + fs * .045); g.fillStyle = C.ink; g.fillText(ch, wx, wy + dy); g.globalAlpha = 1; wx += cw; if (k > .2) once('l' + i, 'tick'); });
-        if (!handoff) { const n = Math.floor(clamp((t - 3100) / 800) * TAG.length); if (n > 0) { g.font = `500 ${Math.max(13, F * .12)}px JB`; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = C.ink; g.globalAlpha = .85; g.fillText(TAG.slice(0, n) + (n < TAG.length && Math.floor(t / 110) % 2 ? '▌' : ''), W / 2, ly + L + L * .3); g.globalAlpha = 1; } } }
+        [...NAME].forEach((ch, i) => { const k = handoff ? 1 : out(clamp((t - 2350 - i * 80) / 520)), cw = g.measureText(ch).width; if (k > 0) { const dy = (1 - k) * fs * .28;
+          g.globalAlpha = k; g.fillStyle = C.mintS; g.fillText(ch, wx + fs * .045, wy + dy + fs * .045); g.fillStyle = C.ink; g.fillText(ch, wx, wy + dy); g.globalAlpha = 1; } wx += cw; });
+        if (!handoff) { const k = sm(clamp((t - 2950) / 600)); if (k > 0) { g.globalAlpha = k * .85; g.font = `500 ${Math.max(13, F * .12)}px JB`; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = C.ink; g.fillText(TAG, W / 2, ly + L + L * .3 + (1 - k) * 8); g.globalAlpha = 1; } }
+        else { const k = 1 - clamp((now - handoff.t) / 350); if (k > 0) { g.globalAlpha = k * .85; g.font = `500 ${Math.max(13, F * .12)}px JB`; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = C.ink; g.fillText(TAG, W / 2, ly + L + L * .3); g.globalAlpha = 1; } } }
       requestAnimationFrame(frame); }
     requestAnimationFrame(frame);
   }
@@ -392,7 +380,7 @@
 
   // ---------------------------------------------------------------- go
   function start() {
-    MINTFX.splitHeads(); drawMarks(); wallInit(); wallHoverInit(); machineInit(); chartHover(); layerArt(); boardArt(); drawPreview(); reveals(); MINTFX.bgInit(); MINTFX.progress(); MINTFX.burst(); MINTFX.tilt(); flipwall(); setInterval(countdown, 1000);
+    MINTFX.splitHeads(); drawMarks(); wallInit(); wallHoverInit(); machineInit(); chartHover(); layerArt(); boardArt(); drawPreview(); reveals(); MINTFX.bgInit(); MINTFX.progress(); MINTFX.tilt(); flipwall(); setInterval(countdown, 1000);
     const snd = $('#snd'), sndUi = () => snd.classList.toggle('on', MINTSOUND.on); snd.onclick = e => { e.stopPropagation(); MINTSOUND.toggle(); }; document.addEventListener('mintsound', sndUi); sndUi();
     if (!RM && matchMedia('(hover: hover)').matches) addEventListener('pointermove', e => { if (scrollY > innerHeight) return; const x = e.clientX / innerWidth - .5, y = e.clientY / innerHeight - .5; $('.hero-wall').style.transform = `translate(${(-x * 14).toFixed(1)}px, ${(-y * 10).toFixed(1)}px) rotate(${(x * .8).toFixed(2)}deg)`; }, { passive: true });
     $('#connect').onclick = () => S.wallet ? toast('connected ' + short(S.wallet)) : openWallet();

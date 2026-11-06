@@ -507,3 +507,35 @@ body.intro-on .hcard { opacity: 0; }
 
 .hero > .scrollcue { position: absolute; }
 @media (max-width: 560px) { .swall { grid-auto-rows: 66px; } .st:not(.sz4):not(.sz2) .st-n { display: none; } .st { padding: 8px 9px; } .st b { font-size: 15px; } }
+
+/* ---------------------------------------------------------------- v5: one light surface everywhere, calmer motion */
+.btn-ink::after { display: none; }
+.hcard { display: none; }
+/* the payoff section on the same mint ground as the rest */
+#crash .sec-lede { color: var(--ink-2); }
+#crash .ladder-wrap { background: var(--paper); border: 2.5px solid var(--ink); box-shadow: var(--sh-s); color: var(--ink); }
+#crash .ladder-wrap input[type=range]::-webkit-slider-runnable-track { background: var(--ink); }
+#crash .ladder-wrap input[type=range]::-webkit-slider-thumb { background: var(--coral); border-color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+#crash .ladder-wrap input[type=range]::-moz-range-thumb { background: var(--coral); border-color: var(--ink); }
+#crash .rung { border: 2px solid rgba(12, 21, 18, .16); background: var(--white); }
+#crash .rung .bar { background: #ebe8df; } #crash .rung .bar i { background: var(--mint-d); }
+#crash .rung.hit { background: #ffe9e7; border-color: var(--coral); } #crash .rung.hit .bar i { background: var(--coral); } #crash .rung.hit .pay { color: var(--ink); }
+#crash .crash-meta div { border-color: rgba(12, 21, 18, .16); background: var(--white); } #crash .crash-meta b { color: var(--ink); }
+#crash .part { background: var(--paper); border: 2.5px solid var(--ink); box-shadow: var(--sh-s); }
+#crash .part h3 { color: var(--ink); } #crash .part h3 .sw { border-color: var(--ink); } #crash .part p, #crash .rules p { color: var(--ink-2); }
+#crash .plink { color: var(--ink); }
+#crash .fine { color: var(--ink); }
+/* light panels instead of black ones */
+.why-live { background: var(--paper); color: var(--ink); border: 2.5px solid var(--ink); box-shadow: var(--sh-s); }
+.why-live .kick-line { color: var(--ink); border-color: var(--ink); }
+.wl-stat b.dn { color: var(--down); } .wl-stat b.up { color: var(--up); } .wl-stat.mint b { text-decoration-color: var(--mint-d); }
+#whySpark { background: var(--white); border: 2px solid rgba(12, 21, 18, .12); }
+.verdict { background: var(--paper); color: var(--ink); border: 2.5px solid var(--ink); } .verdict .v-k { background: var(--ink); color: var(--mint); }
+.vaultviz { background: var(--white); } .vv-l { color: var(--ink); } .vv-l .sw { border-color: var(--ink); }
+.tape { background: var(--paper); color: var(--ink); border-block: 2.5px solid var(--ink); }
+.tape-in span { border-right-color: rgba(12, 21, 18, .15); } .tape-in em { color: var(--ink); } .tape-in .dn { color: var(--down); } .tape-in .up { color: var(--up); }
+/* smoother reveals */
+.reveal { transform: translateY(18px); transition: opacity .9s cubic-bezier(.2, .7, .2, 1), transform 1s cubic-bezier(.2, .7, .2, 1); }
+.kl { transform: translateY(104%); transition: transform 1s cubic-bezier(.2, .8, .2, 1); transition-delay: calc(var(--i) * 24ms + .05s); }
+.st:hover, .card:hover, .steps li:hover { transition-duration: .25s; }
+.bt[data-tilt], .preview[data-tilt], .wcard[data-tilt] { transition: transform .45s cubic-bezier(.2, .7, .2, 1), box-shadow .3s; }

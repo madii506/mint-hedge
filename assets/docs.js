@@ -6,7 +6,7 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const api = async (a, p) => { const r = await fetch('/api/mint?' + new URLSearchParams({ a, ...(p || {}) })); const j = await r.json().catch(() => ({ error: 'bad response' })); if (!r.ok || j.error) throw new Error(j.error || 'failed'); return j; };
   $$('canvas.leafmark').forEach(c => { const s = +c.dataset.size; c.width = c.height = Math.round(s * 1.06 * DPR); c.style.width = c.style.height = s * 1.06 + 'px'; const g = c.getContext('2d'); g.scale(DPR, DPR); A.leaf(g, 0, 0, s, { shadow: null }); });
-  MINTFX.splitHeads(); MINTFX.bgInit(); MINTFX.progress(); MINTFX.burst();
+  MINTFX.splitHeads(); MINTFX.bgInit(); MINTFX.progress();
   const snd = $('#snd'), ui = () => snd.classList.toggle('on', MINTSOUND.on); snd.onclick = e => { e.stopPropagation(); MINTSOUND.toggle(); }; document.addEventListener('mintsound', ui); ui();
   const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('shown'); } }), { rootMargin: '0px 0px -10% 0px' });
   $$('.ds, .dhero-in').forEach(el => { el.classList.add('reveal'); io.observe(el); });
