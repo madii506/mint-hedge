@@ -36,19 +36,13 @@
   <div class="hero-copy">
     <h1 class="lockup"><canvas class="leafmark" id="heroLeaf" data-size="120"></canvas><span class="wm">mint</span></h1>
     <p class="tagline">the NFT that hedges against the stock market</p>
-    <p class="lede">Every mint holds its own vault: tokenized gold and dollars in the mix you pick, plus a real bet that pays if the S&amp;P&nbsp;500 falls. It lives on Solana, you sign every step in your own wallet, and when you burn it the vault is yours.</p>
+    <p class="lede">Every mint holds its own vault of tokenized gold and dollars, plus a real bet that pays if the S&amp;P&nbsp;500 falls. Burn it whenever you want and the vault is yours.</p>
     <div class="cta">
       <a class="btn btn-ink" href="#mint">mint yours</a>
       <a class="btn btn-line" href="#why">why it exists</a>
     </div>
-    <p class="mood" id="mood"><span class="dot"></span><span id="moodText">reading the market…</span></p>
-    <div class="hstats">
-      <div><b id="hsMints">—</b><span>mints</span></div>
-      <div><b id="hsVault">—</b><span>held in vaults</span></div>
-      <div><b id="hsClose">—</b><span>until the crash market closes</span></div>
-    </div>
   </div>
-  <div class="hero-wall"><canvas id="wall" aria-label="a wall of Wall Street bears; every mint turns one into a leaf"></canvas><p class="wall-cap">every mint turns one bear into a leaf</p></div>
+  <div class="hero-wall"><canvas id="wall" aria-label="a wall of Wall Street bears"></canvas><div class="hcard" data-tilt><canvas id="heroCard" aria-label="a mint"></canvas><div class="hc-b"><b id="hcName">mint #1</b><span>gold · dollars · crash bet</span></div></div></div>
   <a class="scrollcue" href="#why" aria-label="scroll down"><span></span></a>
 </section>
 
@@ -173,12 +167,17 @@
 <!-- 04 BOARD -->
 <section class="sec" id="board" data-fx="grid">
   <header class="sec-head reveal"><span class="kick">04 · live</span><h2>the board.</h2>
-    <p class="sec-lede">Everything a mint touches, live: the prices, the last 15 days of stocks against gold, what the market charges for each crash level, what's sitting in the vaults, and the newest mints.</p></header>
+    <p class="sec-lede">Everything a mint touches, live: 50+ tokenized stocks, the last 15 days of stocks against gold, what the market charges for each crash level, what's in the vaults, and the newest mints.</p></header>
   <div class="board" id="boardGrid">
     <div class="bt reveal" data-k="spy" data-tilt><canvas class="bt-art" data-bear="1"></canvas><span class="bt-name">S&amp;P 500</span><span class="bt-sub">SPYx · tokenized SPY</span><b class="bt-px">—</b><span class="bt-ch">—</span><canvas class="bt-spark" data-h="spy"></canvas><span class="bt-liq">—</span></div>
     <div class="bt reveal" data-k="gold" data-tilt><canvas class="bt-art" data-art="goldbar"></canvas><span class="bt-name">gold</span><span class="bt-sub">GLDx · tokenized GLD</span><b class="bt-px">—</b><span class="bt-ch">—</span><canvas class="bt-spark" data-h="gold"></canvas><span class="bt-liq">—</span></div>
     <div class="bt reveal" data-k="sol" data-tilt><canvas class="bt-art" data-leaf="1"></canvas><span class="bt-name">SOL</span><span class="bt-sub">what you mint with</span><b class="bt-px">—</b><span class="bt-ch">—</span><span class="bt-liq">—</span></div>
     <div class="bt reveal" data-k="usdc" data-tilt><canvas class="bt-art" data-art="usdtile"></canvas><span class="bt-name">dollars</span><span class="bt-sub">USDC</span><b class="bt-px">—</b><span class="bt-ch">—</span><span class="bt-liq">—</span></div>
+  </div>
+  <div class="swall-wrap reveal">
+    <div class="bp-head"><h3>the stock wall</h3><div class="sw-tools"><button class="on" data-ss="cap">biggest</button><button data-ss="move">movers</button><button data-ss="az">A–Z</button><span id="swCount"></span></div></div>
+    <p class="fine sw-note" id="swNote">115 tokenized stocks and ETFs on Solana from xStocks, live: the real share price and market cap from the xStocks feed, and the 24-hour move where the token trades enough on Solana to have one.</p>
+    <div class="swall" id="swall"><div class="skel">loading the stocks…</div></div>
   </div>
   <div class="bgrid">
     <div class="bpanel bchart reveal">
@@ -250,7 +249,6 @@
   <h2 class="lockup lockup-s"><canvas class="leafmark" data-size="72"></canvas><span class="wm">mint</span></h2>
   <p class="tagline">the NFT that hedges against the stock market</p>
   <div class="cta cta-c"><a class="btn btn-ink" href="#mint">mint yours</a><a class="btn btn-line" href="/docs">read the docs</a></div>
-  <p class="fine">Independent. Not affiliated with Polymarket, Jupiter, Backed/xStocks or Metaplex. Not financial advice.</p>
 </section>
 
 </main>
