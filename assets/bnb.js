@@ -10,7 +10,7 @@
   const KY = 'https://aggregator-api.kyberswap.com/bsc/api/v1', GT = 'https://api.geckoterminal.com/api/v2/networks/bsc';
   const NATIVE = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', ROUTER = '0x6131B5fae19EA4f9D964eAc0408E4408b66337b5';
   const TOK = { gold: { address: '0x21cAef8A43163Eea865baeE23b9C2E327696A3bf', symbol: 'XAUt', decimals: 6 }, usd: { address: '0x55d398326f99059fF775485246999027B3197955', symbol: 'USDT', decimals: 18 }, short: { address: '0x17515B68378d86C38F394c666e79907dA05dcBA9', symbol: 'SQQQon', decimals: 18 } };
-  const MINT_GAS = 3.4e6; // measured: a three-swap mint on BNB Chain mainnet state
+  const MINT_GAS = 1.8e6; // measured: a three-swap mint at the real address against mainnet state estimated 1.72M gas
   const NFT = new E.Interface(['function nextId(address) view returns (uint256)', 'function vaultOf(uint256) view returns (address)', 'function minted() view returns (uint256)', 'function mint(uint256 expectedId, (uint256 value, bytes data, address token, uint256 minOut)[] legs) payable returns (uint256)', 'event Minted(uint256 indexed id, address indexed owner, address indexed vault, uint256 number, uint256 value)']);
   const ERC20 = new E.Interface(['function balanceOf(address) view returns (uint256)', 'function transfer(address to, uint256 amount) returns (bool)']);
   const ACC = new E.Interface(['function executeBatch((address to, uint256 value, bytes data, uint8 operation)[] operations) payable returns (bytes[])', 'function owner() view returns (address)']);
