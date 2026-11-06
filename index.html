@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>mint</title>
+<meta name="description" content="mint is the NFT that hedges against the stock market. Every mint holds a vault of tokenized gold and dollars, plus a real bet that pays if the S&P 500 falls.">
+<meta property="og:title" content="mint">
+<meta property="og:description" content="The NFT that hedges against the stock market.">
+<meta property="og:image" content="https://mint-hedge.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#3fe6a6">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/icon.png">
+<link rel="preload" href="/assets/fonts/interd-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body class="intro-on">
+
+<canvas id="intro" aria-hidden="true"></canvas>
+
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="#top" aria-label="mint"><canvas class="leafmark" data-size="22"></canvas><b>mint</b></a>
+  <div class="nav-links">
+    <a href="#inside">vault</a><a href="#mint">mint</a><a href="#crash">crash</a><a href="#board">board</a><a href="#gallery">gallery</a><a href="#mine">my mints</a>
+  </div>
+  <button class="btn btn-ink btn-sm" id="connect">connect</button>
+</nav>
+
+<main id="top">
+
+<!-- HERO: the banner, alive -->
+<section class="hero" id="hero">
+  <div class="hero-copy">
+    <h1 class="lockup"><canvas class="leafmark" id="heroLeaf" data-size="120"></canvas><span class="wm">mint</span></h1>
+    <p class="tagline">the NFT that hedges against the stock market</p>
+    <p class="lede">Every mint holds its own vault: tokenized gold and dollars in the mix you pick, plus a real bet that pays if the S&amp;P&nbsp;500 falls. Burn it whenever you want and the vault is yours.</p>
+    <div class="cta">
+      <a class="btn btn-ink" href="#mint">mint yours</a>
+      <a class="btn btn-line" href="#inside">how it hedges</a>
+    </div>
+    <p class="mood" id="mood"><span class="dot"></span><span id="moodText">reading the market…</span></p>
+  </div>
+  <div class="hero-wall"><canvas id="wall" aria-label="a wall of Wall Street bears"></canvas></div>
+</section>
+
+<div class="tape" aria-label="live prices"><div class="tape-in" id="tape"><span>loading live prices…</span></div></div>
+
+<!-- 01 INSIDE -->
+<section class="sec" id="inside">
+  <header class="sec-head reveal"><span class="kick">01 · the vault</span><h2>inside a&nbsp;mint.</h2></header>
+  <div class="inside">
+    <div class="stack-wrap">
+      <div class="stack" id="stack">
+        <div class="layer l-bet"><canvas data-art="bet"></canvas></div>
+        <div class="layer l-usd"><canvas data-art="usd"></canvas></div>
+        <div class="layer l-gold"><canvas data-art="gold"></canvas></div>
+        <div class="layer l-nft"><canvas data-art="nft"></canvas></div>
+      </div>
+      <div class="legend" aria-hidden="true"><span data-l="nft"><i class="sw sw-ink"></i>the NFT</span><span data-l="gold"><i class="sw sw-gold"></i>gold</span><span data-l="usd"><i class="sw sw-paper"></i>dollars</span><span data-l="bet"><i class="sw sw-coral"></i>crash bet</span></div>
+    </div>
+    <div class="inside-r">
+    <ol class="steps">
+      <li class="reveal"><b>The NFT.</b> A Metaplex Core asset in your wallet. Its address owns a vault that nobody else can open, us included.</li>
+      <li class="reveal"><b>Gold.</b> Part of your SOL buys Gold xStock (GLDx), a token that tracks a gold ETF, straight into that vault.</li>
+      <li class="reveal"><b>Dollars.</b> The rest buys USDC into the same vault. You set the split anywhere from all gold to all dollars.</li>
+      <li class="reveal"><b>The crash bet.</b> $5.40 buys YES on a live Polymarket question: will the S&amp;P&nbsp;500 dip to your level by December&nbsp;31? It pays $1 a share if it does.</li>
+      <li class="reveal"><b>Redeem.</b> Burn the NFT and the vault pays out to your wallet in the same transaction. Claim the bet when its market resolves.</li>
+    </ol>
+    <div class="chain reveal"><span class="kick">on-chain</span>
+      <a href="https://solscan.io/account/CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d" target="_blank" rel="noopener">Metaplex Core program ↗</a>
+      <a href="https://solscan.io/token/Xsv9hRk1z5ystj9MhnA7Lq4vjSsLwzL2nxrwmwtD3re" target="_blank" rel="noopener">Gold xStock (GLDx) ↗</a>
+      <a href="https://solscan.io/token/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" target="_blank" rel="noopener">USDC ↗</a>
+      <a href="https://solscan.io/account/G5zjkWuBN2sN6PJCWdz2MXZyd7GxMgAPPcGkFKpWfGfZ" target="_blank" rel="noopener">every mint, indexed ↗</a>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 THE MACHINE -->
+<section class="sec" id="mint">
+  <header class="sec-head reveal"><span class="kick">02 · the machine</span><h2>mint&nbsp;one.</h2></header>
+  <div class="machine reveal">
+    <div class="m-controls">
+      <div class="field">
+        <div class="f-top"><label for="sol">how much SOL goes in</label><span class="f-val" id="solUsd">—</span></div>
+        <div class="chips" id="solChips"><button data-v="0.1">0.1</button><button data-v="0.25" class="on">0.25</button><button data-v="0.5">0.5</button><button data-v="1">1</button><input id="sol" type="number" min="0.05" max="50" step="0.01" value="0.25" inputmode="decimal" aria-label="SOL amount"></div>
+      </div>
+      <div class="field">
+        <div class="f-top"><label for="mix">the vault mix</label><span class="f-val" id="mixVal">60% gold · 40% dollars</span></div>
+        <input type="range" id="mix" min="0" max="100" step="5" value="60" aria-label="gold share of the vault">
+        <div class="mixbar"><i id="mixGold"></i><i id="mixUsd"></i></div>
+        <div class="mixlabels"><span>all dollars</span><span>all gold</span></div>
+      </div>
+      <div class="field">
+        <div class="f-top"><label>the crash bet</label><label class="switch"><input type="checkbox" id="betOn" checked><span></span><em id="betOnTxt">on</em></label></div>
+        <p class="f-note" id="betNote">$5.40 of your SOL buys YES on one S&amp;P&nbsp;500 level. Pick how deep:</p>
+        <div class="levels" id="levels"><div class="skel">loading live levels…</div></div>
+      </div>
+    </div>
+    <div class="m-out">
+      <div class="preview"><canvas id="preview" width="560" height="560" aria-label="your mint"></canvas></div>
+      <dl class="receipt" id="receipt">
+        <div><dt>into the vault, gold</dt><dd id="rGold">—</dd></div>
+        <div><dt>into the vault, dollars</dt><dd id="rUsd">—</dd></div>
+        <div><dt>crash bet</dt><dd id="rBet">—</dd></div>
+        <div><dt>kept for rent and fees</dt><dd id="rRes">0.012 SOL</dd></div>
+      </dl>
+      <button class="btn btn-ink btn-big" id="mintBtn">connect a wallet to mint</button>
+      <ol class="progress" id="progress" hidden></ol>
+      <p class="m-fine">No mint fee. About 0.007 SOL of it is account rent that comes back when you redeem. Quotes are live from Jupiter; prices move.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 03 CRASH -->
+<section class="sec sec-ink" id="crash">
+  <header class="sec-head reveal"><span class="kick">03 · the payoff</span><h2>when stocks&nbsp;dump.</h2></header>
+  <div class="crash">
+    <div class="ladder-wrap reveal">
+      <div class="ladder-top"><span>if the S&amp;P&nbsp;500 touches</span><b id="touchVal">$6,000</b><span>by Dec&nbsp;31</span></div>
+      <input type="range" id="touch" min="4000" max="7400" step="50" value="6000" aria-label="S&P 500 level">
+      <div class="ladder" id="ladder"><div class="skel">loading live levels…</div></div>
+      <p class="fine" id="crashSrc">Live from Polymarket's “What will S&amp;P 500 (SPX) hit by end of December?” via Jupiter. A bet costs the YES price per $1 it pays.</p>
+    </div>
+    <div class="parts reveal">
+      <div class="part"><h3><i class="sw sw-gold"></i>the gold</h3><p>Moves with the price of gold, not with stocks. In some sell-offs gold held up and in some it didn't. That's the point of a mix.</p></div>
+      <div class="part"><h3><i class="sw sw-paper"></i>the dollars</h3><p>Stay a dollar. They don't fall when stocks fall, and they don't rise either.</p></div>
+      <div class="part"><h3><i class="sw sw-coral"></i>the bet</h3><p>The part built for a crash. It pays $1 a share if the S&amp;P&nbsp;500 touches your level before December&nbsp;31, and goes to zero if it doesn't.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 BOARD -->
+<section class="sec" id="board">
+  <header class="sec-head reveal"><span class="kick">04 · live</span><h2>the&nbsp;board.</h2></header>
+  <div class="board" id="boardGrid">
+    <div class="bt reveal" data-k="spy"><canvas class="bt-art" data-bear="1"></canvas><span class="bt-name">S&amp;P 500</span><span class="bt-sub">SPYx · tokenized SPY</span><b class="bt-px">—</b><span class="bt-ch">—</span></div>
+    <div class="bt reveal" data-k="gold"><canvas class="bt-art" data-art="goldbar"></canvas><span class="bt-name">gold</span><span class="bt-sub">GLDx · tokenized GLD</span><b class="bt-px">—</b><span class="bt-ch">—</span></div>
+    <div class="bt reveal" data-k="sol"><canvas class="bt-art" data-leaf="1"></canvas><span class="bt-name">SOL</span><span class="bt-sub">what you mint with</span><b class="bt-px">—</b><span class="bt-ch">—</span></div>
+    <div class="bt reveal" data-k="usdc"><canvas class="bt-art" data-art="usdtile"></canvas><span class="bt-name">dollars</span><span class="bt-sub">USDC</span><b class="bt-px">—</b><span class="bt-ch">—</span></div>
+  </div>
+  <div class="verdict reveal" id="verdict"><span class="v-k">today</span><b id="verdictTxt">—</b></div>
+</section>
+
+<!-- 05 GALLERY -->
+<section class="sec" id="gallery">
+  <header class="sec-head reveal"><span class="kick">05 · every mint</span><h2>the&nbsp;gallery.</h2></header>
+  <div class="gallery" id="galleryGrid"><div class="empty">reading the chain…</div></div>
+</section>
+
+<!-- 06 MINE -->
+<section class="sec" id="mine">
+  <header class="sec-head reveal"><span class="kick">06 · yours</span><h2>my&nbsp;mints.</h2></header>
+  <div class="mine" id="mineBox"><div class="empty">Connect a wallet to see your mints, what their vaults hold, and your crash bets. <button class="btn btn-ink btn-sm" data-connect>connect</button></div></div>
+</section>
+
+<!-- 07 FAQ -->
+<section class="sec" id="faq">
+  <header class="sec-head reveal"><span class="kick">07 · fine print</span><h2>questions.</h2></header>
+  <div class="faq">
+    <details class="reveal"><summary>Is this a guaranteed hedge?</summary><p>No. Gold doesn't always rise when stocks fall, and the bet only pays if the S&amp;P&nbsp;500 actually touches your level before December&nbsp;31. Any part can lose value, and you can lose what you put in.</p></details>
+    <details class="reveal"><summary>Who holds the gold and the dollars?</summary><p>The NFT does. The vault's token accounts belong to the NFT's own signer address, a program-derived address of Metaplex Core. Only the NFT's owner can move them, through Core's <code>execute</code> instruction, and redeeming burns the NFT in the same transaction. This site never holds your funds.</p></details>
+    <details class="reveal"><summary>Where does the crash bet live?</summary><p>In your wallet, as a Jupiter prediction position on Polymarket's market. It is not inside the NFT, so selling the NFT doesn't sell the bet. Claim it in “my mints” after the market resolves.</p></details>
+    <details class="reveal"><summary>What is Gold xStock?</summary><p>GLDx is a Solana token from Backed's xStocks that tracks the SPDR Gold Shares ETF. Like every tokenized security, its issuer can pause or move it. xStocks aren't offered to US persons; check what applies where you live.</p></details>
+    <details class="reveal"><summary>Why can't I add a bet from the US?</summary><p>Jupiter's prediction markets are closed to the US and South Korea. You can still mint with gold and dollars only.</p></details>
+    <details class="reveal"><summary>What does it cost?</summary><p>There's no mint fee. You pay Solana fees, swap costs, and about 0.007 SOL of account rent, which comes back when you redeem.</p></details>
+    <details class="reveal"><summary>Can I sell or send my mint?</summary><p>Yes. It's a Metaplex Core NFT, and whoever owns it owns the vault.</p></details>
+    <details class="reveal"><summary>Are you part of Polymarket, Jupiter, Backed or Metaplex?</summary><p>No. mint is independent and uses their public tools. Nothing here is financial advice.</p></details>
+  </div>
+</section>
+
+<section class="outro">
+  <h2 class="lockup lockup-s"><canvas class="leafmark" data-size="72"></canvas><span class="wm">mint</span></h2>
+  <p class="tagline">the NFT that hedges against the stock market</p>
+  <a class="btn btn-ink" href="#mint">mint yours</a>
+</section>
+
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+<div class="modal" id="walletModal" hidden><div class="modal-card"><h3>connect a wallet</h3><div id="walletList"></div><button class="btn btn-line btn-sm" data-close>close</button></div></div>
+
+<script src="/assets/web3.min.js" defer></script>
+<script src="/assets/art.js" defer></script>
+<script src="/assets/app.js" defer></script>
+</body>
+</html>
