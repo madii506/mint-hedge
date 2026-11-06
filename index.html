@@ -10,8 +10,10 @@
 <meta property="og:image" content="https://mint-hedge.vercel.app/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#3fe6a6">
-<link rel="icon" type="image/png" href="/favicon.png">
-<link rel="apple-touch-icon" href="/icon.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=6">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon.png?v=6">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png?v=6">
+<link rel="apple-touch-icon" href="/icon.png?v=6">
 <link rel="preload" href="/assets/fonts/interd-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/style.css">
 </head>
@@ -50,8 +52,7 @@
 
 <!-- 00 WHY -->
 <section class="sec" id="why" data-fx="candles">
-  <header class="sec-head reveal"><span class="kick">00 · the problem</span><h2>everything dumps together.</h2>
-    <p class="sec-lede">When stocks have a bad week, crypto usually has a worse one. Most bags on Solana are the same bet, that risk keeps going up. A mint is the other side of that bet, in an NFT you'd actually want to hold.</p></header>
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">00 · the problem</span><h2>everything dumps together.</h2></div><div class="sh-r"><p class="sec-lede">When stocks have a bad week, crypto usually has a worse one. Most bags on Solana are the same bet, that risk keeps going up. A mint is the other side of that bet, in an NFT you'd actually want to hold.</p><div class="facts"><div><span>S&amp;P 500 · 24h</span><b id="fx-spy">—</b></div><div><span>gold · 24h</span><b id="fx-gold">—</b></div><div><span>SOL · 24h</span><b id="fx-sol">—</b></div><div><span>stocks down today</span><b id="fx-down">—</b></div></div></div></header>
   <div class="why">
     <article class="wcard reveal" data-tilt style="--d:0"><span class="wnum">01</span><h3>your wallet is long everything</h3><p>Memecoins, majors and tokenized stocks tend to fall at the same time. If the S&amp;P&nbsp;500 slides, a wallet full of risk slides with it.</p></article>
     <article class="wcard reveal" data-tilt style="--d:1"><span class="wnum">02</span><h3>the usual hedge is a chore</h3><p>Brokers, options, margin, expiry dates. It works, but nobody on-chain wants to do it, so nobody does.</p></article>
@@ -70,8 +71,7 @@
 
 <!-- 01 INSIDE -->
 <section class="sec" id="inside" data-fx="gold">
-  <header class="sec-head reveal"><span class="kick">01 · the vault</span><h2>inside a mint.</h2>
-    <p class="sec-lede">A mint isn't a picture with a promise attached. The gold and the dollars sit in token accounts that belong to the NFT itself, and the only key that opens them is owning the NFT.</p></header>
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">01 · the vault</span><h2>inside a mint.</h2></div><div class="sh-r"><p class="sec-lede">A mint isn't a picture with a promise attached. The gold and the dollars sit in token accounts that belong to the NFT itself, and the only key that opens them is owning the NFT.</p><div class="facts"><div><span>vault owner</span><b>the NFT itself</b></div><div><span>gold</span><b>GLDx · Token-2022</b></div><div><span>dollars</span><b>USDC</b></div><div><span>to cash out</span><b>1 transaction</b></div></div></div></header>
   <div class="inside">
     <div class="stack-wrap">
       <div class="stack" id="stack">
@@ -103,8 +103,7 @@
 
 <!-- 02 THE MACHINE -->
 <section class="sec" id="mint" data-fx="candles">
-  <header class="sec-head reveal"><span class="kick">02 · the machine</span><h2>mint one.</h2>
-    <p class="sec-lede">Pick how much goes in, how the vault is split and how deep a crash you want to bet on. Quotes come live from Jupiter. One approval in your wallet sends the whole mint, and a second one places the bet.</p></header>
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">02 · the machine</span><h2>mint one.</h2></div><div class="sh-r"><p class="sec-lede">Pick how much goes in, how the vault is split and how deep a crash you want to bet on. Quotes come live from Jupiter. One approval in your wallet sends the whole mint, and a second one places the bet.</p><div class="facts"><div><span>SOL now</span><b id="fx-solp">—</b></div><div><span>mint fee</span><b>none</b></div><div><span>approvals</span><b>1, +1 for the bet</b></div><div><span>rent back on redeem</span><b>≈ 0.007 SOL</b></div></div></div></header>
   <div class="machine reveal">
     <div class="m-controls">
       <div class="field">
@@ -144,8 +143,7 @@
 
 <!-- 03 CRASH -->
 <section class="sec" id="crash" data-fx="rain">
-  <header class="sec-head reveal"><span class="kick">03 · the payoff</span><h2>when stocks dump.</h2>
-    <p class="sec-lede">This is the part of a mint built for a bad day. Slide to a level and see what a $5.40 bet pays on every rung, using the live prices from Polymarket's S&amp;P&nbsp;500 market.</p></header>
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">03 · the payoff</span><h2>when stocks dump.</h2></div><div class="sh-r"><p class="sec-lede">This is the part of a mint built for a bad day. Slide to a level and see what a $5.40 bet pays on every rung, using the live prices from Polymarket's S&amp;P&nbsp;500 market.</p><div class="facts"><div><span>closes in</span><b id="fx-close">—</b></div><div><span>traded so far</span><b id="fx-vol">—</b></div><div><span>levels open</span><b id="fx-lv">—</b></div><div><span>cheapest YES</span><b id="fx-cheap">—</b></div></div></div></header>
   <div class="crash">
     <div class="ladder-wrap reveal">
       <div class="ladder-top"><span>if the S&amp;P&nbsp;500 touches</span><b id="touchVal">$6,000</b><span>by Dec&nbsp;31</span></div>
@@ -165,8 +163,7 @@
 
 <!-- 04 BOARD -->
 <section class="sec" id="board" data-fx="grid">
-  <header class="sec-head reveal"><span class="kick">04 · live</span><h2>the board.</h2>
-    <p class="sec-lede">Everything a mint touches, live: 50+ tokenized stocks, the last 15 days of stocks against gold, what the market charges for each crash level, what's in the vaults, and the newest mints.</p></header>
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">04 · live</span><h2>the board.</h2></div><div class="sh-r"><p class="sec-lede">Everything a mint touches, live: 50+ tokenized stocks, the last 15 days of stocks against gold, what the market charges for each crash level, what's in the vaults, and the newest mints.</p><div class="facts"><div><span>stocks tracked</span><b id="fx-stocks">—</b></div><div><span>refresh</span><b>every minute</b></div><div><span>stock prices</span><b>xStocks feed</b></div><div><span>crash prices</span><b>Polymarket</b></div></div></div></header>
   <div class="board" id="boardGrid">
     <div class="bt reveal" data-k="spy" data-tilt><canvas class="bt-art" data-bear="1"></canvas><span class="bt-name">S&amp;P 500</span><span class="bt-sub">SPYx · tokenized SPY</span><b class="bt-px">—</b><span class="bt-ch">—</span><canvas class="bt-spark" data-h="spy"></canvas><span class="bt-liq">—</span></div>
     <div class="bt reveal" data-k="gold" data-tilt><canvas class="bt-art" data-art="goldbar"></canvas><span class="bt-name">gold</span><span class="bt-sub">GLDx · tokenized GLD</span><b class="bt-px">—</b><span class="bt-ch">—</span><canvas class="bt-spark" data-h="gold"></canvas><span class="bt-liq">—</span></div>
@@ -212,36 +209,15 @@
 
 <!-- 05 GALLERY -->
 <section class="sec" id="gallery" data-fx="parade">
-  <header class="sec-head reveal"><span class="kick">05 · every mint</span><h2>the gallery.</h2>
-    <p class="sec-lede">Every mint ever made, read straight from the chain: who owns it, what its vault holds right now, and what that's worth. Burned mints stay in the list, marked redeemed.</p></header>
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">05 · every mint</span><h2>the gallery.</h2></div><div class="sh-r"><p class="sec-lede">Every mint ever made, read straight from the chain: who owns it, what its vault holds right now, and what that's worth. Burned mints stay in the list, marked redeemed.</p><div class="facts"><div><span>mints</span><b id="fx-mints">—</b></div><div><span>held in vaults</span><b id="fx-tvl">—</b></div><div><span>source</span><b>read from the chain</b></div><div><span>index</span><b>G5zj…fGfZ</b></div></div></div></header>
   <div class="gtools reveal"><button class="on" data-sort="new">newest</button><button data-sort="big">biggest vault</button><button data-sort="gold">most gold</button><span id="gcount"></span></div>
   <div class="gallery" id="galleryGrid"><div class="empty">reading the chain…</div></div>
 </section>
 
 <!-- 06 MINE -->
 <section class="sec" id="mine" data-fx="leaves">
-  <header class="sec-head reveal"><span class="kick">06 · yours</span><h2>my mints.</h2>
-    <p class="sec-lede">Your mints and your crash bets in one place. Add gold or dollars to a vault, redeem a mint to take its vault out, or claim a bet once its market has resolved.</p></header>
+  <header class="sec-head reveal"><div class="sh-l"><span class="kick">06 · yours</span><h2>my mints.</h2></div><div class="sh-r"><p class="sec-lede">Your mints and your crash bets in one place. Add gold or dollars to a vault, redeem a mint to take its vault out, or claim a bet once its market has resolved.</p><div class="facts"><div><span>redeem</span><b>burn → vault to you</b></div><div><span>top up</span><b>anyone, any time</b></div><div><span>bets</span><b>claim when resolved</b></div><div><span>custody</span><b>never us</b></div></div></div></header>
   <div class="mine" id="mineBox"><div class="empty">Connect a wallet to see your mints, what their vaults hold, and your crash bets. <button class="btn btn-ink btn-sm" data-connect>connect</button></div></div>
-</section>
-
-<!-- 07 FAQ -->
-<section class="sec" id="faq" data-fx="leaves">
-  <header class="sec-head reveal"><span class="kick">07 · fine print</span><h2>questions.</h2>
-    <p class="sec-lede">The short version. Everything else is in the <a href="/docs">docs</a>.</p></header>
-  <div class="faq">
-    <details class="reveal"><summary>Is it a guaranteed hedge?</summary><p>No. Gold can fall with stocks, and the bet only pays if the S&amp;P&nbsp;500 touches your level before December&nbsp;31. You can lose what you put in.</p></details>
-    <details class="reveal"><summary>Who holds the vault?</summary><p>The NFT itself. Only its owner can open the vault, and redeeming burns the NFT in the same transaction. This site never holds your funds.</p></details>
-    <details class="reveal"><summary>Where is the crash bet?</summary><p>In your wallet, as a Polymarket position through Jupiter. Claim it in “my mints” when the market resolves. It isn't available in the US or South Korea.</p></details>
-    <details class="reveal"><summary>What does it cost?</summary><p>No mint fee. Just Solana fees, swap costs and about 0.007 SOL of rent, which comes back when you redeem.</p></details>
-  </div>
-</section>
-
-<section class="outro" data-fx="gold">
-  <canvas id="flipwall" aria-hidden="true"></canvas>
-  <h2 class="lockup lockup-s"><canvas class="leafmark" data-size="72"></canvas><span class="wm">Mint</span></h2>
-  <p class="tagline">the NFT that hedges against the stock market</p>
-  <div class="cta cta-c"><a class="btn btn-ink" href="#mint">mint yours</a><a class="btn btn-line" href="/docs">read the docs</a></div>
 </section>
 
 </main>
