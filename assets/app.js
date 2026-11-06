@@ -37,87 +37,59 @@
   function drawMarks() { $$('canvas.leafmark').forEach(c => { const wm = c.parentElement.querySelector('.wm'); const css = wm ? Math.round(parseFloat(getComputedStyle(wm).fontSize) * .74) : +c.dataset.size;
     const g = sizeCanvas(c, css * 1.06, css * 1.06); c.style.width = css * 1.06 + 'px'; c.style.height = css * 1.06 + 'px'; A.leaf(g, 0, 0, css, { body: C.ink, rib: C.mintL, shadow: css > 40 ? C.mintS : null }); }); }
 
-  // ---------------------------------------------------------------- the intro (about 7.5 s)
-  // night: the real 15-day S&P line climbs across a trading screen with a live ticker underneath; it breaks and crashes;
-  // a bear market rains down and fills the screen; the screen ripples to mint; the bears fall; the leaf builds itself,
-  // lands with a shockwave, "mint" drops in letter by letter, and the logo flies into the page
+  // ---------------------------------------------------------------- the intro (about 5 s), clean: one bear tile drops in and
+  // gets its ▼, flips over into the leaf, the tile falls away, the leaf lands, "mint" drops in letter by letter, the line types
+  // itself, and the logo flies into the page
   function intro(done) {
     const cv = $('#intro'); if (RM || location.hash || scrollY > 10 || document.hidden) { cv.remove(); document.body.classList.remove('intro-on'); return done(); }
-    setTimeout(() => { if (document.body.contains(cv)) { cv.remove(); document.body.classList.remove('intro-on', 'handoff'); } }, 14000); // never leave the page behind a stuck intro
+    setTimeout(() => { if (document.body.contains(cv)) { cv.remove(); document.body.classList.remove('intro-on', 'handoff'); } }, 12000); // never leave the page behind a stuck intro
     history.scrollRestoration = 'manual'; scrollTo(0, 0);
     const W = innerWidth, H = innerHeight, g = sizeCanvas(cv, W, H); cv.style.width = W + 'px'; cv.style.height = H + 'px';
-    const r = A.rng(42), ease = t => 1 - Math.pow(1 - t, 3), inOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+    const ease = t => 1 - Math.pow(1 - t, 3), inOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
     const back = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
-    // the chart: the real last 15 days of SPYx when we have them, otherwise a plain climbing line
-    const N = 44, peakX = W * .64, pts = []; const hs = S.hist && S.hist.spy; let real = false;
-    if (hs && hs.length > 20) { real = true; const v = hs.map(p => p[1]), mn = Math.min(...v), mx = Math.max(...v); for (let i = 0; i <= N; i++) { const k = i / N, val = v[Math.min(v.length - 1, Math.round(k * (v.length - 1)))]; pts.push([k * peakX, Math.round((H * .72 - (val - mn) / (mx - mn || 1) * H * .4) / 4) * 4]); } }
-    else { let y = H * .66; for (let i = 0; i <= N; i++) { y += (r() - .62) * H * .04; y = clamp(y, H * .25, H * .75); pts.push([(i / N) * peakX, Math.round(y / 4) * 4]); } }
-    const crash = []; let cx = peakX, cy = pts[N][1]; for (let i = 0; i < 9; i++) { cx += W * (.03 + r() * .02); cy += H * (.06 + r() * .07) * (i ? 1 : .4) - (i % 3 === 1 ? H * .04 : 0); crash.push([cx, Math.round(cy / 4) * 4]); }
-    const candles = []; for (let i = 0; i < 46; i++) { const o = H * (.3 + r() * .4), c = o + (r() - .5) * H * .08; candles.push({ x: i * W / 46, o, c, hi: Math.min(o, c) - r() * 20, lo: Math.max(o, c) + r() * 20 }); }
-    // the bears
-    const ts = Math.max(54, Math.min(W, H) / 5.8), gap = ts * .24, step = ts + gap, cols = Math.ceil(W / step) + 1, rows = Math.ceil(H / step) + 1, tiles = [];
-    const ox = (W - (cols * step - gap)) / 2, oy = (H - (rows * step - gap)) / 2;
-    for (let yy = 0; yy < rows; yy++) for (let xx = 0; xx < cols; xx++) { const tx = ox + xx * step, ty = oy + yy * step;
-      tiles.push({ x: tx, y: ty, col: C.rows[yy % 6], spec: A.bearSpec(r), land: 2050 + (rows - 1 - yy) * 150 + r() * 380, fall: 3700 + (tx / W) * 700 + r() * 250, vr: (r() - .5) * .006, vx: (r() - .5) * .12, blink: r() * 3000, landed: false }); }
-    const B = Math.max(40, Math.round(Math.min(W, H) / 14)), blocks = []; for (let by = 0; by < H; by += B) for (let bx = 0; bx < W; bx += B) blocks.push({ x: bx, y: by, d: 3500 + Math.hypot(bx + B / 2 - W / 2, by + B / 2 - H / 2) / Math.hypot(W / 2, H / 2) * 600 + r() * 160 });
-    // the lockup
-    const L = Math.min(W * .2, H * .25), F = L / .74; g.font = `700 ${F}px ID`; const ww = g.measureText('mint').width, gapL = L * .14, lockW = L * 1.06 + gapL + ww;
-    const lx = (W - lockW) / 2, ly = H * .45 - L / 2, px = L / 16;
-    const cells = A.LEAF.map(([x, y, k]) => ({ x, y, k, sx: W * .2 + r() * W * .6, sy: H + 20 + r() * H * .3, d: 4350 + r() * 700 + (x + y) * 10 }));
-    const sparks = []; for (let i = 0; i < 46; i++) { const a = r() * Math.PI * 2, v = .25 + r() * .55; sparks.push({ a, v, s: 4 + Math.floor(r() * 3) * 3, c: r() < .5 ? C.ink : r() < .5 ? C.gold : '#ffffff' }); }
+    // the lockup's final size and place (centred), and where the tile sits before it
+    const L = Math.min(W * .17, H * .22), F = L / .74; g.font = `700 ${F}px ID`; const ww = g.measureText('mint').width, gapL = L * .14, lockW = L * 1.06 + gapL + ww;
+    const lx = (W - lockW) / 2, ly = H * .46 - L / 2, cx0 = W / 2, cy0 = H * .46, TS = L * 1.25;
+    const spec = A.bearSpec(A.rng(11)), r = A.rng(7), dust = Array.from({ length: 28 }, () => ({ a: r() * 6.283, v: .3 + r() * .7, s: 3 + Math.floor(r() * 3) * 2 }));
     const TAG = 'the NFT that hedges against the stock market';
-    const P = S.status && S.status.prices, tick = P ? [P.spy && `S&P 500 ${usd(P.spy.usd)} ${pct(P.spy.ch24)}`, P.gold && `GOLD ${usd(P.gold.usd)} ${pct(P.gold.ch24)}`, P.sol && `SOL ${usd(P.sol.usd)} ${pct(P.sol.ch24)}`].filter(Boolean).join('     ·     ') : 'S&P 500     ·     GOLD     ·     SOL';
-    let t0 = performance.now(), handoff = null, finished = false, shook = false, chimed = false, lastTick = 0;
-    const skip = () => { if (!handoff && performance.now() - t0 < 5950) t0 = performance.now() - 5950; };
+    let t0 = performance.now(), handoff = null, finished = false, cues = {};
+    const once = (k, n) => { if (!cues[k]) { cues[k] = 1; cue(n); } };
+    const skip = () => { if (!handoff && performance.now() - t0 < 3900) t0 = performance.now() - 3900; };
     addEventListener('pointerdown', skip, { once: true }); addEventListener('keydown', skip, { once: true });
-    function stepped(list, n, col, w) { g.strokeStyle = col; g.lineWidth = w; g.lineJoin = 'miter'; g.lineCap = 'square'; g.beginPath(); g.moveTo(list[0][0], list[0][1]); for (let i = 1; i < n; i++) { g.lineTo(list[i][0], list[i - 1][1]); g.lineTo(list[i][0], list[i][1]); } g.stroke(); }
     function frame(now) {
       const t = now - t0; g.setTransform(DPR, 0, 0, DPR, 0, 0); g.clearRect(0, 0, W, H);
-      let alpha = 1, lead = { x: lx, y: ly, s: 1 };
-      if (t > 6650 && !handoff) { const tl = $('#heroLeaf').getBoundingClientRect(); handoff = { t: now, x: tl.left, y: tl.top, s: (tl.width / 1.06) / L }; document.body.classList.add('handoff'); document.body.classList.remove('intro-on'); }
-      if (handoff) { const k = clamp((now - handoff.t) / 1000), e = inOut(k); alpha = 1 - clamp((k - .55) / .45); lead = { x: lx + (handoff.x - lx) * e, y: ly + (handoff.y - ly) * e, s: 1 + (handoff.s - 1) * e };
+      if (t > 4300 && !handoff) { const tl = $('#heroLeaf').getBoundingClientRect(); handoff = { t: now, x: tl.left, y: tl.top, s: (tl.width / 1.06) / L }; document.body.classList.add('handoff'); document.body.classList.remove('intro-on'); }
+      let bgA = 1, X = lx, Y = ly, sc = 1;
+      if (handoff) { const k = clamp((now - handoff.t) / 950), e = inOut(k); bgA = 1 - clamp((k - .45) / .55); X = lx + (handoff.x - lx) * e; Y = ly + (handoff.y - ly) * e; sc = 1 + (handoff.s - 1) * e;
         if (k >= 1 && !finished) { finished = true; document.body.classList.remove('handoff'); cv.remove(); return done(); } }
-      if (t > 1650 && t < 2350) { const k = 1 - (t - 1650) / 700, a = 8 * k; g.translate((Math.random() - .5) * a, (Math.random() - .5) * a); if (!shook) { shook = true; cue('thud'); } }
-      // ground
-      if (!handoff) { g.fillStyle = C.ink; g.fillRect(-10, -10, W + 20, H + 20); g.fillStyle = C.mint; for (const b of blocks) { const k = clamp((t - b.d) / 260); if (k <= 0) continue; const s = B * ease(k); g.fillRect(b.x + (B - s) / 2, b.y + (B - s) / 2, s + .5, s + .5); } }
-      else { g.globalAlpha = alpha; g.fillStyle = C.mint; g.fillRect(-10, -10, W + 20, H + 20); g.globalAlpha = 1; }
-      // the trading screen
-      if (!handoff && t < 3950) { const fade = 1 - clamp((t - 3350) / 500), zoom = 1 + clamp(t / 1600) * .05; g.globalAlpha = fade;
-        g.save(); g.translate(W * .32, H * .55); g.scale(zoom, zoom); g.translate(-W * .32, -H * .55);
-        g.fillStyle = 'rgba(63,230,166,.06)'; for (let gy = 40; gy < H; gy += 60) g.fillRect(0, gy, W, 1); for (let gx = 40; gx < W; gx += 80) g.fillRect(gx, 0, 1, H);
-        candles.forEach((k, i) => { const vis = clamp(t / 1400 - i / 60); if (!vis) return; g.globalAlpha = fade * .16 * vis; g.fillStyle = k.c < k.o ? C.mint : C.coral; g.fillRect(k.x + 8, k.hi, 2, k.lo - k.hi); g.fillRect(k.x + 3, Math.min(k.o, k.c), 12, Math.max(3, Math.abs(k.c - k.o))); });
-        g.globalAlpha = fade;
-        const k = clamp(t / 1500), n = Math.max(2, Math.floor(1 + k * N)); stepped(pts, n, C.mint, Math.max(4, W / 260));
-        let hx = pts[n - 1][0], hy = pts[n - 1][1], crashed = t > 1550;
-        if (crashed) { const kc = clamp((t - 1550) / 650), m = Math.max(1, Math.ceil(kc * crash.length)); stepped([pts[N], ...crash], m + 1, C.coral, Math.max(5, W / 220)); hx = crash[m - 1][0]; hy = crash[m - 1][1]; }
-        const pulse = 7 + Math.sin(t / 90) * 2; g.fillStyle = crashed ? C.coral : C.mint; g.fillRect(hx - pulse, hy - pulse, pulse * 2, pulse * 2);
-        const sp = P && P.spy; g.font = `600 ${Math.max(13, W / 90)}px JB`; g.textBaseline = 'bottom'; g.textAlign = 'left';
-        const lab = crashed ? 'S&P 500 ▼' : `S&P 500${sp ? ' ' + usd(sp.usd) : ''}${real ? ' · 15 days' : ''}`;
-        g.fillStyle = crashed ? C.coral : C.mint; g.fillText(lab, Math.min(hx + 14, W - 260), Math.max(40, hy - 14));
-        g.restore();
-        // the live ticker along the bottom
-        g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, H - 44, W, 44); g.font = `600 ${Math.max(12, W / 110)}px JB`; g.textBaseline = 'middle'; g.fillStyle = crashed ? C.coral : C.mint;
-        const tw = g.measureText(tick + '          ').width, off = -(t * .12) % tw; for (let x = off; x < W; x += tw) g.fillText(tick, x, H - 22);
-        if (crashed && t < 2400) { g.fillStyle = `rgba(255,90,95,${.22 * (1 - (t - 1550) / 850)})`; g.fillRect(0, 0, W, H); }
-        g.globalAlpha = 1; }
-      // the bears
-      if (!handoff) for (const T of tiles) { const tl = t - T.land; if (tl < -900) continue;
-        let x = T.x, yy = T.y, rot = 0, sc = 1; if (tl < 0) { const k = 1 + tl / 900; yy = T.y - (1 - k * k) * (H * .9 + ts); } else { if (!T.landed) { T.landed = true; if (now - lastTick > 55) { lastTick = now; cue('tick'); } } sc = 1 + Math.sin(clamp(tl / 260) * Math.PI) * .06; }
-        const tf = t - T.fall; if (tf > 0) { yy += .0022 * tf * tf; x += T.vx * tf; rot = T.vr * tf; if (yy > H + ts) continue; }
-        g.save(); g.translate(x + ts / 2, yy + ts / 2); g.rotate(rot); g.scale(sc, sc * (tl >= 0 && tl < 120 ? .92 : 1)); g.translate(-ts / 2, -ts / 2);
-        A.tile(g, 0, 0, ts, T.col, T.spec, { badge: tl > 120, blink: ((t + T.blink) % 2600) < 120 }); g.restore(); }
-      // the leaf, the shockwave, the wordmark, the line
-      if (t > 4200) { const Pp = px * lead.s, X = lead.x, Y = lead.y, shA = clamp((t - 5150) / 250), cxL = X + L * lead.s * .5, cyL = Y + L * lead.s * .5;
-        if (!handoff && t > 5150 && t < 6400) { const k = clamp((t - 5150) / 1100), R = ease(k) * Math.hypot(W, H) * .55; g.strokeStyle = `rgba(12,21,18,${.35 * (1 - k)})`; g.lineWidth = 10 * (1 - k) + 2; g.beginPath(); g.arc(cxL, cyL, R, 0, Math.PI * 2); g.stroke();
-          for (const s of sparks) { const d = ease(k) * Math.min(W, H) * s.v; g.globalAlpha = 1 - k; g.fillStyle = s.c; g.fillRect(cxL + Math.cos(s.a) * d - s.s / 2, cyL + Math.sin(s.a) * d - s.s / 2, s.s, s.s); } g.globalAlpha = 1; }
-        if (shA > 0) { g.globalAlpha = shA; g.fillStyle = C.mintS; for (const c of A.LEAF) g.fillRect(X + c.x * Pp + L * lead.s * .05, Y + c.y * Pp + L * lead.s * .05, Pp + .6, Pp + .6); g.globalAlpha = 1; if (!chimed) { chimed = true; cue('chime'); } }
-        const land = handoff ? 1 : 1 + Math.sin(clamp((t - 5150) / 300) * Math.PI) * .05;
-        for (const c of cells) { const k = clamp((t - c.d) / 560); if (k <= 0) continue; const e = ease(k), tx = cxL + (X + c.x * Pp - cxL) * land, ty = cyL + (Y + c.y * Pp - cyL) * land, x = handoff ? X + c.x * Pp : c.sx + (tx - c.sx) * e, yy = handoff ? Y + c.y * Pp : c.sy + (ty - c.sy) * e;
-          g.fillStyle = c.k === 'r' ? C.mintL : C.ink; g.fillRect(x, yy, Pp * land + .6, Pp * land + .6); }
-        const fs = F * lead.s; g.font = `700 ${fs}px ID`; g.textBaseline = 'middle'; g.textAlign = 'left'; let wx = X + (L * 1.06 + gapL) * lead.s; const wy = Y + L * lead.s * .5 - fs * .04;
-        [...'mint'].forEach((ch, i) => { const k = clamp((t - 5300 - i * 110) / 380); if (k <= 0 && !handoff) { wx += g.measureText(ch).width; return; } const e = handoff ? 1 : back(k), dy = (1 - e) * -fs * .5;
-          g.globalAlpha = handoff ? 1 : clamp(k * 2.5); g.fillStyle = C.mintS; g.fillText(ch, wx + fs * .045, wy + dy + fs * .045); g.fillStyle = C.ink; g.fillText(ch, wx, wy + dy); g.globalAlpha = 1; wx += g.measureText(ch).width; });
-        if (!handoff) { const n = Math.floor(clamp((t - 5800) / 700) * TAG.length); if (n > 0) { g.font = `500 ${Math.max(14, F * .13)}px JB`; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = C.ink; g.fillText(TAG.slice(0, n) + (n < TAG.length && Math.floor(t / 120) % 2 ? '▌' : ''), W / 2, Y + L + L * .28); } } }
+      g.globalAlpha = bgA; g.fillStyle = C.mint; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
+      // 1 · the bear tile drops in, gets its ▼, shivers, flips over
+      if (!handoff && t < 2100) {
+        const kin = clamp(t / 520), drop = (1 - back(kin)) * -H * .25, shake = t > 700 && t < 1050 ? Math.sin(t / 18) * 3 * (1 - (t - 700) / 350) : 0;
+        const kf = clamp((t - 1050) / 520), flip = Math.abs(Math.cos(kf * Math.PI)), front = kf < .5, kOut = clamp((t - 1650) / 450);
+        if (t > 60) { once('in', 'tick'); }
+        g.save(); g.translate(cx0 + shake, cy0 + drop); g.scale(Math.max(.03, kf > 0 && kf < 1 ? flip : 1) * (1 + Math.sin(kin * Math.PI) * .04), 1);
+        g.globalAlpha = 1 - kOut; g.fillStyle = 'rgba(12,21,18,.18)'; A.rr(g, -TS / 2 + TS * .06, -TS / 2 + TS * .08, TS, TS, TS * .18); g.fill(); g.globalAlpha = 1;
+        if (front) A.tile(g, -TS / 2, -TS / 2, TS, C.rows[0], spec, { badge: t > 620, blink: t > 380 && t < 470 });
+        else { g.globalAlpha = 1 - kOut; A.rr(g, -TS / 2 - TS * .05, -TS / 2 - TS * .05, TS * 1.1, TS * 1.1, TS * .21); g.fillStyle = '#fff'; g.fill(); A.rr(g, -TS / 2, -TS / 2, TS, TS, TS * .16); g.fillStyle = C.mintL; g.fill(); g.globalAlpha = 1; }
+        g.restore(); if (t > 620) once('badge', 'pop'); if (kf > .5) once('flip', 'tick'); }
+      // 2 · the leaf: born on the back of the tile, grows to full size, lands with a puff of pixels
+      if (t > 1310) { const kg = clamp((t - 1310) / 700), e = handoff ? 1 : ease(kg), s0 = TS * .62, size = (s0 + (L - s0) * e) * sc;
+        const moveK = handoff ? 1 : inOut(clamp((t - 2150) / 650)), startX = cx0 - size / 2, startY = cy0 - size / 2;
+        const px = handoff ? X : startX + (lx - startX) * moveK, py = handoff ? Y : startY + (ly - startY) * moveK;
+        const landK = clamp((t - 2020) / 900);
+        if (!handoff && landK > 0 && landK < 1) { const R = ease(landK) * L * 1.6; g.strokeStyle = `rgba(12,21,18,${.28 * (1 - landK)})`; g.lineWidth = 6 * (1 - landK) + 1; g.beginPath(); g.arc(px + size / 2, py + size / 2, R, 0, 7); g.stroke();
+          g.fillStyle = C.ink; for (const d of dust) { const dd = ease(landK) * L * 1.3 * d.v; g.globalAlpha = (1 - landK) * .8; g.fillRect(px + size / 2 + Math.cos(d.a) * dd, py + size / 2 + Math.sin(d.a) * dd, d.s, d.s); } g.globalAlpha = 1; once('land', 'chime'); }
+        const flipping = !handoff && t < 1570; if (flipping) { const fl = Math.abs(Math.cos(clamp((t - 1050) / 520) * Math.PI)); g.save(); g.translate(px + size / 2, 0); g.scale(Math.max(.03, fl), 1); g.translate(-(px + size / 2), 0); }
+        const shK = handoff ? 1 : clamp((t - 2000) / 200), off = size * .05; if (shK > 0) { g.globalAlpha = shK; A.leaf(g, px + off * shK, py + off * shK, size, { body: C.mintS, rib: C.mintS, shadow: null }); g.globalAlpha = 1; }
+        A.leaf(g, px, py, size, { body: C.ink, rib: C.mintL, shadow: null }); if (flipping) g.restore();
+        // a shimmer runs up the rib once
+        if (!handoff && t > 2300 && t < 3000) { const k = (t - 2300) / 700, P = size / 16; g.fillStyle = '#ffffff'; for (const [x, y, kk] of A.LEAF) if (kk === 'r' && Math.abs((15 - y) / 15 - k) < .09) g.fillRect(px + x * P, py + y * P, P + .4, P + .4); }
+        // 3 · the name, letter by letter, then the line
+        const fs = F * sc; g.font = `700 ${fs}px ID`; g.textBaseline = 'middle'; g.textAlign = 'left'; let wx = px + (L * 1.06 + gapL) * sc; const wy = py + size * .5 - fs * .04;
+        if (t > 2500 || handoff) [...'mint'].forEach((ch, i) => { const k = handoff ? 1 : clamp((t - 2550 - i * 95) / 360); const cw = g.measureText(ch).width; if (k <= 0) { wx += cw; return; }
+          const e2 = back(k), dy = (1 - e2) * -fs * .45; g.globalAlpha = clamp(k * 2.5); g.fillStyle = C.mintS; g.fillText(ch, wx + fs * .045, wy + dy + fs * .045); g.fillStyle = C.ink; g.fillText(ch, wx, wy + dy); g.globalAlpha = 1; wx += cw; if (k > .2) once('l' + i, 'tick'); });
+        if (!handoff) { const n = Math.floor(clamp((t - 3100) / 800) * TAG.length); if (n > 0) { g.font = `500 ${Math.max(13, F * .12)}px JB`; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = C.ink; g.globalAlpha = .85; g.fillText(TAG.slice(0, n) + (n < TAG.length && Math.floor(t / 110) % 2 ? '▌' : ''), W / 2, ly + L + L * .3); g.globalAlpha = 1; } } }
       requestAnimationFrame(frame); }
     requestAnimationFrame(frame);
   }
@@ -180,7 +152,7 @@
   function crashScroll() { const sec = $('#crash'), p = $('#crashPath'); if (!sec || !p) return; const len = p.__len || (p.__len = p.getTotalLength()); const b = sec.getBoundingClientRect(); const k = Math.max(0, Math.min(1, (innerHeight - b.top) / (b.height + innerHeight * .2))); p.style.strokeDasharray = len; p.style.strokeDashoffset = (len * (1 - k)).toFixed(1); }
 
   // ---------------------------------------------------------------- live status
-  async function loadStatus() { try { const s = await api('status'); S.status = s; if (s.mints != null && s.mints > S.mints) S.mints = s.mints; renderStatus(); } catch (e) { $('#moodText').textContent = 'live prices are offline right now'; } }
+  async function loadStatus() { try { const s = await api('status'); S.status = s; if (s.mints != null && s.mints > S.mints) S.mints = s.mints; renderStatus(); } catch (e) { } }
   function renderStatus() {
     const s = S.status, P = s.prices || {}, cm = s.crash, mk = cm && cm.markets || [];
     const items = [];
@@ -190,7 +162,6 @@
     mk.forEach(m => items.push(`S&amp;P ↓${lvl(m.level)} by Dec 31 · YES <em>${usd(m.yes, 2)}</em>`));
     items.push(`mints <em>${S.mints}</em>`);
     if (items.length) { const one = items.map(x => `<span>${x}</span>`).join(''); $('#tape').innerHTML = one + one; }
-    const mood = $('#mood'); if (P.spy) { const d = P.spy.ch24 < 0; mood.className = 'mood ' + (d ? 'down' : 'up'); $('#moodText').innerHTML = `S&amp;P 500 ${pct(P.spy.ch24)} today · ${d ? 'the bears are out' : 'the bears are hiding'}`; }
     ['spy', 'gold', 'sol', 'usdc'].forEach(k => { const el = $(`.bt[data-k="${k}"]`), v = P[k]; if (!el || !v) return; MINTFX.tween($('.bt-px', el), v.usd, x => usd(x, k === 'usdc' ? 4 : 2)); const c = $('.bt-ch', el); c.textContent = pct(v.ch24) + ' 24h'; c.className = 'bt-ch ' + cls(v.ch24);
       if (v.liquidity) $('.bt-liq', el).textContent = `${big(v.liquidity)} of liquidity on Solana`; });
     if (P.spy && P.gold) { const d = P.gold.ch24 - P.spy.ch24, a = Math.abs(d).toFixed(2);
@@ -202,9 +173,9 @@
     MINTFX.tween($('#hsMints'), S.mints, x => Math.round(x).toLocaleString('en-US')); MINTFX.tween($('#bsMints'), S.mints, x => Math.round(x).toLocaleString('en-US'));
     countdown(); updateQuote(); layerArt();
   }
-  function countdown() { if (!S.closes) return; const ms = new Date(S.closes) - Date.now(); if (ms <= 0) { ['#cdown', '#hsClose', '#bsClose'].forEach(i => $(i).textContent = 'closed'); return; }
+  function countdown() { if (!S.closes) return; const ms = new Date(S.closes) - Date.now(); if (ms <= 0) { ['#cdown', '#bsClose'].forEach(i => $(i) && ($(i).textContent = 'closed')); return; }
     const d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4), sec = Math.floor(ms % 6e4 / 1e3), pad = n => String(n).padStart(2, '0');
-    $('#cdown').textContent = `${d}d ${pad(h)}h ${pad(m)}m ${pad(sec)}s`; $('#hsClose').textContent = `${d}d ${pad(h)}h`; $('#bsClose').textContent = `${d}d ${pad(h)}h ${pad(m)}m`; }
+    $('#cdown').textContent = `${d}d ${pad(h)}h ${pad(m)}m ${pad(sec)}s`; $('#bsClose').textContent = `${d}d ${pad(h)}h ${pad(m)}m`; }
   function renderLevels() {
     const mk = S.status.crash.markets;
     $('#levels').innerHTML = mk.map(m => `<button class="lv${m.id === S.market ? ' on' : ''}" data-id="${m.id}"><b>${lvl(m.level)}</b><span>YES ${usd(m.yes, 2)} · pays ${(1 / m.yes).toFixed(1)}×</span><span>$5.40 → ${usd(5.4 / m.yes, 2)}</span></button>`).join('');
@@ -264,6 +235,21 @@
   function renderPools() { const p = S.pools; if (!p) return; const row = (k, x) => `<a class="prow" href="https://www.geckoterminal.com/solana/pools/${x.id}" target="_blank" rel="noopener"><span class="pn">${esc(x.name)}</span><span>${big(x.liq)} <i>liquidity</i></span><span>${big(x.vol)} <i>24h volume</i></span></a>`;
     $('#pools').innerHTML = ['spy', 'gold'].map(k => (p[k] || []).slice(0, 2).map(x => row(k, x)).join('')).join('') || '<div class="skel">no pools found</div>'; }
 
+  // ---------------------------------------------------------------- the stock wall: every tokenized stock on Solana, live
+  const SW = { items: [], sort: 'cap', first: true };
+  async function loadStocks() { try { const d = await api('stocks'); SW.items = d.items.filter(x => x.price > 0); renderStocks(); } catch (e) { if (!SW.items.length) $('#swall').innerHTML = `<div class="skel">the stock feed is busy right now (${esc(e.message)}), retrying soon</div>`; } }
+  function renderStocks() { const it = [...SW.items]; if (!it.length) return;
+    const byCap = [...it].sort((a, b) => (b.mcap || 0) - (a.mcap || 0)), rank = new Map(byCap.map((x, i) => [x.id, i]));
+    if (SW.sort === 'cap') it.sort((a, b) => (b.mcap || 0) - (a.mcap || 0)); if (SW.sort === 'az') it.sort((a, b) => a.s.localeCompare(b.s));
+    if (SW.sort === 'move') it.sort((a, b) => (b.ch24 == null ? -1 : Math.abs(b.ch24)) - (a.ch24 == null ? -1 : Math.abs(a.ch24)));
+    const moved = it.filter(x => x.ch24 != null), up = moved.filter(x => x.ch24 >= 0).length;
+    $('#swCount').textContent = `${it.length} stocks · ${up} up · ${moved.length - up} down`;
+    const shade = c => c == null ? '' : c >= 0 ? (c > 2 ? 'u3' : c > .7 ? 'u2' : 'u1') : (c < -2 ? 'd3' : c < -.7 ? 'd2' : 'd1');
+    const cap = x => x >= 1e12 ? '$' + (x / 1e12).toFixed(2) + 'T' : x >= 1e9 ? '$' + (x / 1e9).toFixed(1) + 'B' : x >= 1e6 ? '$' + (x / 1e6).toFixed(0) + 'M' : '';
+    $('#swall').innerHTML = it.map((x, i) => { const r = rank.get(x.id), size = SW.sort === 'cap' ? (r < 4 ? 'sz4' : r < 14 ? 'sz2' : '') : '';
+      return `<a class="st ${size} ${shade(x.ch24)}" style="--i:${Math.min(i, 60)}" href="https://jup.ag/tokens/${x.id}" target="_blank" rel="noopener" title="${esc(x.n)}"><b>${esc(x.s.replace(/x$/, ''))}</b><span class="st-n">${esc(x.n)}</span><span class="st-p">${usd(x.price, 2)}</span><span class="st-c">${x.ch24 == null ? (x.mcap ? cap(x.mcap) : '') : pct(x.ch24)}</span></a>`; }).join('');
+    if (SW.first) { SW.first = false; $('#swall').classList.add('intro'); setTimeout(() => $('#swall').classList.remove('intro'), 2400); } }
+
   // ---------------------------------------------------------------- 02: the machine
   let qT, qN = 0;
   const blocked = () => S.geo && /^(US|KR)$/.test(S.geo);
@@ -298,7 +284,8 @@
         if (it.k === 'g') A.goldBar(g, x, y + 22, Math.max(1.4, (cw - 2) / 14)); else if (it.k === 'u') { g.fillStyle = '#d4fbe9'; g.fillRect(x, y + 14, cw - 3, 26); g.fillStyle = C.mintD; g.fillRect(x, y + 14, cw - 3, 3); g.fillRect(x, y + 37, cw - 3, 3); } else { g.fillStyle = C.coral; g.fillRect(x, y + 4, cw - 3, 48); g.fillStyle = '#fff4ef'; g.fillRect(x + 3, y + 10, cw - 9, 6); } });
       g.globalAlpha = 1; g.fillStyle = 'rgba(233,255,246,.25)'; g.fillRect(0, h - 6, w, 2); if (busy) requestAnimationFrame(t => this.draw(t)); else this.run = false; } };
   function setMintBtn(txt, dis) { const b = $('#mintBtn'); if (S.busy) return; b.disabled = !!dis; b.textContent = txt || (S.wallet ? `mint #${(S.mints || 0) + 1}` : 'connect a wallet to mint'); }
-  let palI = 0; function drawPreview() { const c = $('#preview'); const g = sizeCanvas(c, 280, 280); nftArt(g, 280, (S.mints || 0) + 1, PALS[palI % PALS.length]); }
+  let palI = 0; function drawPreview() { const c = $('#preview'); const g = sizeCanvas(c, 280, 280); nftArt(g, 280, (S.mints || 0) + 1, PALS[palI % PALS.length]);
+    const h = $('#heroCard'); if (h) { const gh = sizeCanvas(h, 176, 176); nftArt(gh, 176, (S.mints || 0) + 1, PALS[(palI + 2) % PALS.length]); $('#hcName').textContent = `mint #${(S.mints || 0) + 1}`; } }
   function machineInit() {
     $$('#solChips button').forEach(b => b.onclick = () => { $$('#solChips button').forEach(x => x.classList.toggle('on', x === b)); $('#sol').value = b.dataset.v; cue('tick'); updateQuote(); });
     $('#sol').oninput = () => { $$('#solChips button').forEach(x => x.classList.toggle('on', x.dataset.v === $('#sol').value)); updateQuote(); };
@@ -410,6 +397,8 @@
     if (!RM && matchMedia('(hover: hover)').matches) addEventListener('pointermove', e => { if (scrollY > innerHeight) return; const x = e.clientX / innerWidth - .5, y = e.clientY / innerHeight - .5; $('.hero-wall').style.transform = `translate(${(-x * 14).toFixed(1)}px, ${(-y * 10).toFixed(1)}px) rotate(${(x * .8).toFixed(2)}deg)`; }, { passive: true });
     $('#connect').onclick = () => S.wallet ? toast('connected ' + short(S.wallet)) : openWallet();
     $$('[data-connect]').forEach(b => b.onclick = openWallet);
+    $$('.sw-tools [data-ss]').forEach(b => b.onclick = () => { SW.sort = b.dataset.ss; $$('.sw-tools [data-ss]').forEach(x => x.classList.toggle('on', x === b)); cue('tick'); renderStocks(); });
+    loadStocks(); setInterval(loadStocks, 60000);
     $$('.gtools [data-sort]').forEach(b => b.onclick = () => { S.sort = b.dataset.sort; $$('.gtools [data-sort]').forEach(x => x.classList.toggle('on', x === b)); renderGallery(); });
     $('#walletModal').addEventListener('click', e => { if (e.target.id === 'walletModal' || e.target.hasAttribute('data-close')) $('#walletModal').hidden = true; });
     addEventListener('scroll', () => { stackScroll(); crashScroll(); navSpy(); }, { passive: true }); stackScroll(); crashScroll();
