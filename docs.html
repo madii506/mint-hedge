@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>mint docs</title>
+<meta name="description" content="How mint works: the vault inside every NFT, each transaction a mint signs, the crash bet, redeeming, costs, addresses, the API and the risks.">
+<meta property="og:title" content="mint docs">
+<meta property="og:image" content="https://mint-hedge.vercel.app/og.png">
+<meta name="theme-color" content="#3fe6a6">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body class="docs">
+
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="/" aria-label="mint home"><canvas class="leafmark" data-size="22"></canvas><b>mint</b></a>
+  <div class="nav-links"><a href="/#mint">mint</a><a href="/#crash">crash</a><a href="/#gallery">gallery</a><a href="/docs" class="on">docs</a></div>
+  <button class="snd" id="snd" aria-label="sound on or off" title="sound"><span></span><span></span><span></span><span></span></button>
+  <a class="btn btn-ink btn-sm" href="/#mint">mint yours</a>
+  <div class="scrollbar" aria-hidden="true"><i></i></div>
+</nav>
+
+<header class="dhero" data-fx="grid">
+  <div class="dhero-in">
+    <span class="kick">docs · v1</span>
+    <h1 class="kinetic">how mint works.</h1>
+    <p class="lede">Everything a mint does, written down: which accounts hold what, every instruction you sign, how the crash bet pays, what it costs, and what can go wrong. All numbers on this page are live.</p>
+    <div class="dflow" aria-label="where your SOL goes">
+      <svg viewBox="0 0 900 250" role="img" aria-label="SOL splits into gold, dollars and the crash bet">
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0c1512"/></marker></defs>
+        <g class="fl-node"><rect x="20" y="95" width="150" height="62" rx="14"/><text x="95" y="132">your SOL</text></g>
+        <path class="fl-line" d="M170 126 C 260 126 260 40 360 40" marker-end="url(#ah)"/>
+        <path class="fl-line" d="M170 126 L 360 126" marker-end="url(#ah)"/>
+        <path class="fl-line coral" d="M170 126 C 260 126 260 212 360 212" marker-end="url(#ah)"/>
+        <g class="fl-node gold"><rect x="362" y="12" width="210" height="56" rx="14"/><text x="467" y="46">GLDx · gold</text></g>
+        <g class="fl-node paper"><rect x="362" y="98" width="210" height="56" rx="14"/><text x="467" y="132">USDC · dollars</text></g>
+        <g class="fl-node coral"><rect x="362" y="184" width="210" height="56" rx="14"/><text x="467" y="218">YES · crash bet</text></g>
+        <path class="fl-line" d="M572 40 C 640 40 640 100 700 100" marker-end="url(#ah)"/>
+        <path class="fl-line" d="M572 126 C 640 126 640 120 700 120" marker-end="url(#ah)"/>
+        <path class="fl-line coral" d="M572 212 L 700 212" marker-end="url(#ah)"/>
+        <g class="fl-node mint"><rect x="702" y="70" width="180" height="80" rx="16"/><text x="792" y="104">the NFT's vault</text><text class="sm" x="792" y="128">only the owner opens it</text></g>
+        <g class="fl-node ink"><rect x="702" y="184" width="180" height="56" rx="14"/><text x="792" y="218">your wallet</text></g>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<div class="dwrap">
+  <aside class="toc" id="toc">
+    <a href="#overview">overview</a><a href="#anatomy">anatomy of a mint</a><a href="#minting">minting, step by step</a><a href="#redeem">redeem and top up</a><a href="#bet">the crash bet</a><a href="#costs">costs</a><a href="#addresses">addresses</a><a href="#api">API</a><a href="#selftest">live self-test</a><a href="#risks">risks</a>
+  </aside>
+  <main class="dmain">
+
+  <section class="ds" id="overview">
+    <h2 class="kinetic">overview.</h2>
+    <p>A <b>mint</b> is a Metaplex Core NFT on Solana with a vault inside it. When you mint, part of your SOL is swapped into <b>Gold xStock (GLDx)</b>, a token that tracks the SPDR Gold Shares ETF, and the rest into <b>USDC</b>. Both land in token accounts owned by the NFT itself. Optionally, $5.40 buys <b>YES</b> on a Polymarket question about the S&amp;P&nbsp;500 falling to a level you pick before December&nbsp;31. That bet pays $1 per share if the index touches the level.</p>
+    <p>Burn the NFT at any time and the vault pays out to your wallet in the same transaction. Sell or send it and the vault goes with it. There's no mint fee and no admin key. This site builds the transactions; your wallet signs every one of them.</p>
+    <div class="dstats"><div><b id="dMints">—</b><span>mints so far</span></div><div><b id="dVault">—</b><span>held in vaults now</span></div><div><b id="dGold">—</b><span>GLDx in vaults</span></div><div><b id="dUsd">—</b><span>USDC in vaults</span></div></div>
+  </section>
+
+  <section class="ds" id="anatomy">
+    <h2 class="kinetic">anatomy of a mint.</h2>
+    <p>Six accounts are involved. Four are created when you mint; the bet position is created by Jupiter when your order fills.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>account</th><th>what it is</th><th>owner / authority</th></tr></thead>
+      <tbody>
+        <tr><td><b>the NFT</b></td><td>a Metaplex Core asset named <code>mint #N</code>, standalone (no collection), metadata served from <code>/api/mint?a=meta</code></td><td>your wallet</td></tr>
+        <tr><td><b>vault signer</b></td><td>the asset's signer address: a program-derived address of Metaplex Core, seeds <code>["mpl-core-execute", asset]</code>. It has no private key.</td><td>can only sign through Core's <code>execute</code>, which checks that the caller owns the NFT</td></tr>
+        <tr><td><b>gold vault</b></td><td>the associated token account for GLDx (Token-2022, 8 decimals) of the vault signer</td><td>vault signer</td></tr>
+        <tr><td><b>dollar vault</b></td><td>the associated token account for USDC (SPL Token, 6 decimals) of the vault signer</td><td>vault signer</td></tr>
+        <tr><td><b>crash bet</b></td><td>a Jupiter prediction position on Polymarket's market, YES side</td><td>your wallet (not the NFT)</td></tr>
+        <tr><td><b>index</b></td><td>every mint transaction includes a 0-lamport transfer to <code>G5zj…fGfZ</code> that names the asset, so the gallery can find every mint from the chain alone</td><td>nobody; it's just an address to search</td></tr>
+      </tbody></table></div>
+  </section>
+
+  <section class="ds" id="minting">
+    <h2 class="kinetic">minting, step by step.</h2>
+    <p>Your SOL is split first: $5.40 worth (plus 1.5% for swap slippage) goes to the bet if you chose one, <b>0.012 SOL</b> is kept back for account rent and fees, and the rest is divided by your gold / dollars mix. Then your wallet signs these transactions in one approval, and they're sent in order:</p>
+    <ol class="txs">
+      <li><span class="tx-k">tx 1 · create</span><p>Compute-budget price → Core <code>CreateV2</code> (a fresh asset keypair co-signs, you pay, you own it) → create the gold vault and the dollar vault (associated token accounts, idempotent) → the 0-lamport index transfer.</p></li>
+      <li><span class="tx-k">tx 2 · gold</span><p>A Jupiter swap SOL → GLDx with <code>destinationTokenAccount</code> set to the gold vault, so the gold never touches your wallet. Slippage limit 1%.</p></li>
+      <li><span class="tx-k">tx 3 · dollars</span><p>A Jupiter swap SOL → USDC into the dollar vault. Slippage limit 1%.</p></li>
+      <li><span class="tx-k coral">tx 4 · bet USDC</span><p>Only with a bet: a Jupiter swap SOL → about $5.40 USDC into your own wallet.</p></li>
+      <li><span class="tx-k coral">tx 5 · the order</span><p>Only with a bet: Jupiter's prediction API builds a buy-YES order on your chosen market, deposit just under $5.40 USDC; you sign it as a second approval. Jupiter's keeper fills it and your position appears in a few seconds.</p></li>
+    </ol>
+    <p class="note">If tx 1 fails nothing else is sent. If a swap fails after tx 1, your mint exists with that part of the vault empty, and you can fill it from “my mints”. If the order fails, the USDC stays in your wallet.</p>
+  </section>
+
+  <section class="ds" id="redeem">
+    <h2 class="kinetic">redeem and top up.</h2>
+    <p><b>Redeem</b> is one transaction: create your own GLDx and USDC accounts if you don't have them, then for each vault a Core <code>execute</code> runs SPL <code>transferChecked</code> for the whole balance and <code>closeAccount</code> (rent back to you), signed by the vault signer inside Core, and finally Core <code>BurnV1</code> burns the NFT. Only the current owner can do it. The bet is separate: claim it in “my mints” when the market resolves.</p>
+    <p><b>Top up</b>: anyone can add gold or dollars to any mint's vault. It's a Jupiter swap with the vault as the destination. The vault only ever opens for the NFT's owner.</p>
+  </section>
+
+  <section class="ds" id="bet">
+    <h2 class="kinetic">the crash bet.</h2>
+    <p>The bet uses Polymarket's event <b id="bTitle">“What will S&amp;P 500 (SPX) hit by end of December?”</b>, traded through Jupiter's prediction markets. Each “↓ level” market pays $1 per YES share if the S&amp;P&nbsp;500 trades at or below that level at any point before the market closes.</p>
+    <div class="crash-meta light"><div><span>closes in</span><b id="bClose">—</b></div><div><span>traded so far</span><b id="bVol">—</b></div><div><span>resolution source</span><b>Yahoo Finance, ^GSPC 1-minute lows</b></div></div>
+    <blockquote id="bRules">loading the rule…</blockquote>
+    <div class="tbl"><table>
+      <thead><tr><th>S&amp;P 500 touches</th><th>buy YES</th><th>sell YES</th><th>pays per $1</th><th>$5.40 pays</th></tr></thead>
+      <tbody id="bTable"><tr><td colspan="5">loading live levels…</td></tr></tbody></table></div>
+    <p class="note">The gap between buy and sell is the spread you pay to get in and out early. These markets are thin. Jupiter's prediction markets are closed to the US and South Korea, so the site turns the bet off there. You can still mint with gold and dollars.</p>
+  </section>
+
+  <section class="ds" id="costs">
+    <h2 class="kinetic">costs.</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>item</th><th>amount</th><th>comes back?</th></tr></thead>
+      <tbody>
+        <tr><td>mint fee</td><td>none</td><td>—</td></tr>
+        <tr><td>NFT account rent</td><td>≈ 0.003 SOL</td><td>yes, when you redeem (burn)</td></tr>
+        <tr><td>gold vault rent (Token-2022 account)</td><td>≈ 0.0021 SOL</td><td>yes, the vault closes on redeem</td></tr>
+        <tr><td>dollar vault rent</td><td>0.00204 SOL</td><td>yes, the vault closes on redeem</td></tr>
+        <tr><td>network + priority fees</td><td>≈ 0.0001–0.0015 SOL per mint</td><td>no</td></tr>
+        <tr><td>swap costs</td><td>Jupiter's route price, slippage limit 1%</td><td>no</td></tr>
+        <tr><td>the bet's spread</td><td>buy minus sell YES price (see above)</td><td>no</td></tr>
+      </tbody></table></div>
+    <p class="note">0.012 SOL is held back from the swaps to cover rent and fees; whatever isn't used stays in your wallet.</p>
+  </section>
+
+  <section class="ds" id="addresses">
+    <h2 class="kinetic">addresses.</h2>
+    <div class="tbl addr"><table><tbody>
+      <tr><td>Metaplex Core program</td><td><a href="https://solscan.io/account/CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d" target="_blank" rel="noopener"><code>CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d</code></a></td></tr>
+      <tr><td>Gold xStock (GLDx) mint</td><td><a href="https://solscan.io/token/Xsv9hRk1z5ystj9MhnA7Lq4vjSsLwzL2nxrwmwtD3re" target="_blank" rel="noopener"><code>Xsv9hRk1z5ystj9MhnA7Lq4vjSsLwzL2nxrwmwtD3re</code></a></td></tr>
+      <tr><td>USDC mint</td><td><a href="https://solscan.io/token/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" target="_blank" rel="noopener"><code>EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v</code></a></td></tr>
+      <tr><td>SP500 xStock (SPYx), for the board</td><td><a href="https://solscan.io/token/XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W" target="_blank" rel="noopener"><code>XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W</code></a></td></tr>
+      <tr><td>mint index</td><td><a href="https://solscan.io/account/G5zjkWuBN2sN6PJCWdz2MXZyd7GxMgAPPcGkFKpWfGfZ" target="_blank" rel="noopener"><code>G5zjkWuBN2sN6PJCWdz2MXZyd7GxMgAPPcGkFKpWfGfZ</code></a></td></tr>
+      <tr><td>Polymarket event</td><td><a href="https://polymarket.com/event/spx-hit-dec-2026" target="_blank" rel="noopener"><code>POLY-148014 · spx-hit-dec-2026</code></a></td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section class="ds" id="api">
+    <h2 class="kinetic">API.</h2>
+    <p>One endpoint, <code>/api/mint</code>, running in Frankfurt. Everything is public. Transactions come back base64-encoded and unsigned (tx 1 is pre-signed by the new asset key only).</p>
+    <div class="api">
+      <div><span class="m get">GET</span><code>?a=status</code><p>prices (SOL, GLDx, SPYx, USDC with 24h change and liquidity), the crash event and its open ↓ levels with buy/sell YES prices, the mint count.</p></div>
+      <div><span class="m get">GET</span><code>?a=quote&amp;sol=0.25&amp;gold=60&amp;bet=1</code><p>the SOL split and live Jupiter quotes for the gold and dollar legs.</p></div>
+      <div><span class="m post">POST</span><code>?a=build</code> <code>{wallet, sol, gold, bet}</code><p>returns <code>asset</code>, <code>vault</code>, <code>n</code>, <code>split</code> and <code>txs[]</code> (create, gold, dollars, bet-usdc), plus <code>bet{market, usdc}</code>. Add <code>simulate: true</code> to get tx 1's simulation.</p></div>
+      <div><span class="m post">POST</span><code>?a=order</code> <code>{wallet, market, usdc}</code><p>a Jupiter prediction buy-YES order transaction for your wallet.</p></div>
+      <div><span class="m post">POST</span><code>?a=send</code> <code>{tx}</code><p>relays a signed transaction and waits for confirmation.</p></div>
+      <div><span class="m post">POST</span><code>?a=redeem</code> <code>{wallet, asset}</code><p>the execute + close + burn transaction; owner only. <code>simulate: true</code> supported.</p></div>
+      <div><span class="m post">POST</span><code>?a=topup</code> <code>{wallet, asset, sol, what}</code><p>adds gold or dollars to any vault.</p></div>
+      <div><span class="m post">POST</span><code>?a=claim</code> <code>{wallet, position}</code><p>claims a resolved bet.</p></div>
+      <div><span class="m get">GET</span><code>?a=gallery</code> · <code>?a=mine&amp;wallet=</code><p>every mint from the index, its owner and vault balances; your mints plus your S&amp;P positions.</p></div>
+      <div><span class="m get">GET</span><code>?a=meta&amp;id=&amp;n=</code> · <code>?a=img&amp;id=&amp;n=</code><p>the NFT's metadata JSON and its 512 px pixel image.</p></div>
+      <div><span class="m get">GET</span><code>?a=selftest</code><p>simulates a full round trip on mainnet (below).</p></div>
+    </div>
+  </section>
+
+  <section class="ds" id="selftest">
+    <h2 class="kinetic">live self-test.</h2>
+    <p>One simulated mainnet transaction that does the whole life of a mint: create an NFT, open its gold vault, have the vault pay out through Core's <code>execute</code>, close the vault, and burn the NFT. Nothing is sent; it just proves the vault mechanics work right now.</p>
+    <button class="btn btn-ink" id="runTest">run the self-test</button>
+    <pre class="term" id="testOut">press the button to simulate.</pre>
+  </section>
+
+  <section class="ds" id="risks">
+    <h2 class="kinetic">risks.</h2>
+    <ul class="risks">
+      <li><b>It's not a guaranteed hedge.</b> Gold can fall with stocks. The bet only pays if the S&amp;P&nbsp;500 touches your level before the market closes; otherwise it's worth $0.</li>
+      <li><b>The issuer controls GLDx.</b> Gold xStock is a tokenized security from Backed. Its mint has a permanent delegate and can be paused, which is normal for tokenized securities and means the issuer can move or freeze it. xStocks aren't offered to US persons.</li>
+      <li><b>Code risk.</b> Your funds rely on Metaplex Core, the SPL token programs, Jupiter's swap and prediction programs, and Polymarket's resolution. A bug in any of them could cost money.</li>
+      <li><b>Thin markets.</b> The crash levels trade lightly, and the buy/sell spread can be wide. Selling a bet early may return much less than you paid.</li>
+      <li><b>The bet isn't inside the NFT.</b> It's in your wallet. If you sell the NFT, you keep the bet; if you lose your wallet, you lose both.</li>
+      <li><b>This site can go away; your vault can't.</b> Everything is on-chain. Any tool that can call Core's <code>execute</code> as the owner can empty a vault without this site.</li>
+      <li><b>Not advice, not affiliated.</b> mint is independent from Polymarket, Jupiter, Backed/xStocks and Metaplex. Nothing here is financial advice.</li>
+    </ul>
+  </section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="/assets/art.js" defer></script>
+<script src="/assets/sound.js" defer></script>
+<script src="/assets/fx.js" defer></script>
+<script src="/assets/docs.js" defer></script>
+</body>
+</html>
