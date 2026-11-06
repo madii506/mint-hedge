@@ -52,6 +52,17 @@ async function crashMarkets() {
 }
 async function mintCount() { let n = 0, before; for (let i = 0; i < 5; i++) { const s = await rpc(c => c.getSignaturesForAddress(TAG, { limit: 1000, before })); n += s.length; if (s.length < 1000) break; before = s[s.length - 1].signature; } return n; }
 
+// every tokenized stock on Solana from xStocks: the real share price and market cap from the xStocks feed (Jupiter's stockData),
+// and the on-chain 24h move only where the token trades enough on Solana for it to mean something
+const NAMES = {};
+async function stocks() {
+  const ids = require('./stocks.json'), out = [];
+  const need = ids.filter(id => !NAMES[id]); for (let i = 0; i < need.length; i += 100) { const d = await getJ(`${JUP}/tokens/v2/search?query=${need.slice(i, i + 100).join(',')}`); for (const t of d) NAMES[t.id] = [t.symbol, String(t.name || '').replace(/ xStock$/, '').replace(/,? (Inc\.?|Corporation|Corp\.?|Incorporated|plc|Ltd\.?|Co\.?)$/i, '')]; }
+  for (let i = 0; i < ids.length; i += 50) { const d = await getJ(`${JUP}/price/v3?ids=${ids.slice(i, i + 50).join(',')}`);
+    for (const id of ids.slice(i, i + 50)) { const p = d[id], nm = NAMES[id]; if (!p || !nm) continue; const sd = p.stockData || {}, liq = p.liquidity || 0;
+      out.push({ s: nm[0], n: nm[1], id, price: sd.price || p.usdPrice, mcap: sd.mcap || null, ch24: liq >= 20000 && p.priceChange24h != null ? p.priceChange24h : null, liq }); } }
+  return out;
+}
 // ---------------------------------------------------------------- jupiter swap into a token account (a mint's vault, or the wallet's own)
 async function swapTx(wallet, outMint, lamports, dest) {
   const q = await getJ(`${JUP}/swap/v1/quote?inputMint=${SOL}&outputMint=${outMint}&amount=${lamports}&slippageBps=100&maxAccounts=40`);
@@ -208,6 +219,7 @@ module.exports = async (req, res) => {
     if (a === 'img') { const buf = png(String(q.id || 'mint'), +q.n || 0); res.setHeader('content-type', 'image/png'); res.setHeader('cache-control', 'public, s-maxage=31536000, immutable'); return res.end(buf); }
     let out;
     if (a === 'status') { const [p, cm, n] = await Promise.allSettled([prices(), crashMarkets(), mintCount()]); out = { prices: p.value || null, crash: cm.value || null, mints: n.status === 'fulfilled' ? n.value : null, errors: [p, cm, n].filter(x => x.status === 'rejected').map(x => x.reason.message), mints_addr: { gold: GOLD, usdc: USDC, spy: SPY, core: CORE.toBase58(), tag: TAG.toBase58() } }; res.setHeader('cache-control', 's-maxage=20, stale-while-revalidate=60'); }
+    else if (a === 'stocks') { out = { items: await stocks(), at: Date.now() }; res.setHeader('cache-control', 's-maxage=60, stale-while-revalidate=300'); }
     else if (a === 'geo') { out = { country: req.headers['x-vercel-ip-country'] || null }; res.setHeader('cache-control', 'private, no-store'); }
     else if (a === 'quote') out = await quote(q);
     else if (a === 'build') out = await build(req);
