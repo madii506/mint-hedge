@@ -26,7 +26,8 @@ const umiBase = () => createUmi(RPCS[0]).use(mplCore());
 const pk = (s, msg) => { try { return new PublicKey(String(s)); } catch { throw Object.assign(new Error(msg || 'bad address'), { code: 400 }); } };
 const bad = msg => Object.assign(new Error(msg), { code: 400 });
 const body = req => new Promise(ok => { if (req.body && typeof req.body === 'object') return ok(req.body); let d = ''; req.on('data', c => d += c); req.on('end', () => { try { ok(JSON.parse(d || '{}')); } catch { ok({}); } }); });
-const getJ = async (url, opt) => { const r = await fetch(url, { ...opt, headers: { accept: 'application/json', 'content-type': 'application/json', ...(opt && opt.headers) } }); const t = await r.text(); let j; try { j = JSON.parse(t); } catch { throw new Error(`${new URL(url).pathname} ${r.status}`); } if (!r.ok) throw Object.assign(new Error(j.error || j.message || `${new URL(url).pathname} ${r.status}`), { code: r.status >= 500 ? 502 : 400 }); return j; };
+const getJ = async (url, opt, tries = 4) => { for (let i = 0; ; i++) { try { return await getJ1(url, opt); } catch (e) { if (i >= tries || !/too many|429|rate/i.test(e.message)) throw e; await new Promise(r => setTimeout(r, 600 * Math.pow(1.8, i) + Math.random() * 300)); } } };
+const getJ1 = async (url, opt) => { const r = await fetch(url, { ...opt, headers: { accept: 'application/json', 'content-type': 'application/json', ...(opt && opt.headers) } }); const t = await r.text(); let j; try { j = JSON.parse(t); } catch { throw new Error(`${new URL(url).pathname} ${r.status}`); } if (!r.ok) throw Object.assign(new Error(j.error || j.message || `${new URL(url).pathname} ${r.status}`), { code: r.status >= 500 ? 502 : 400 }); return j; };
 async function rpc(fn) { let err; for (let i = 0; i < RPCS.length; i++) { try { return await fn(conn); } catch (e) { err = e; conn = new Connection(RPCS[(RPCS.indexOf(conn.rpcEndpoint) + 1) % RPCS.length], 'confirmed'); } } throw err; }
 
 const TOK = {};
@@ -37,13 +38,14 @@ const vaultOf = async (asset, mint) => { const t = await token(mint); return { a
 // ---------------------------------------------------------------- market data (all real, all public)
 async function prices() {
   const d = await getJ(`${JUP}/price/v3?ids=${[SOL, GOLD, SPY, USDC].join(',')}`);
-  const p = id => d[id] ? { usd: d[id].usdPrice, ch24: d[id].priceChange24h ?? null } : null;
+  const p = id => d[id] ? { usd: d[id].usdPrice, ch24: d[id].priceChange24h ?? null, liquidity: d[id].liquidity ?? null } : null;
   return { sol: p(SOL), gold: p(GOLD), spy: p(SPY), usdc: p(USDC) };
 }
 async function crashMarkets() {
   const d = await getJ(`${JUP}/prediction/v1/events/${CRASH_EVENT}`); const ev = d.data || d;
   return { title: ev.metadata && ev.metadata.title, closes: ev.metadata && ev.metadata.closeTime,
-    volume: +ev.volumeUsd / 1e6, image: ev.metadata && ev.metadata.imageUrl,
+    volume: +ev.volumeUsd / 1e6, image: ev.metadata && ev.metadata.imageUrl, slug: ev.metadata && ev.metadata.slug,
+    rules: ((ev.markets || [])[0] || {}).rulesPrimary ? String(ev.markets[0].rulesPrimary).slice(0, 900) : null,
     markets: (ev.markets || []).filter(m => m.status === 'open' && /↓/.test(m.title || ''))
       .map(m => ({ id: m.marketId, level: +String(m.title).replace(/[^\d.]/g, ''), yes: m.pricing ? m.pricing.buyYesPriceUsd / 1e6 : null, bid: m.pricing ? m.pricing.sellYesPriceUsd / 1e6 : null, volume: m.pricing ? m.pricing.volume : 0 }))
       .filter(m => m.yes && m.yes > 0 && m.yes < 1).sort((a, b) => b.level - a.level) };
@@ -92,6 +94,8 @@ async function build(req) {
   const tx1 = await legacy(wallet, ixs, [asset]);
   const out = { asset: asset.publicKey.toBase58(), vault: signer.toBase58(), n, split: s, txs: [{ kind: 'create', tx: b64(tx1) }] };
   if (b.simulate) { const r = await rpc(c => c.simulateTransaction(tx1)); out.sim = { err: r.value.err, units: r.value.unitsConsumed, logs: (r.value.logs || []).slice(-8) }; }
+  // client mode: the browser fetches the Jupiter swaps itself (its own rate limit), straight into these vault accounts
+  if (b.client) { out.vaults = { gold: vg.ata.toBase58(), dollars: vu.ata.toBase58() }; out.legs = { gold: s.goldL, dollars: s.usdL, bet: s.betL }; if (betMarket) out.bet = { market: betMarket }; return out; }
   if (s.goldL) { const w = await swapTx(wallet, GOLD, s.goldL, vg.ata); out.txs.push({ kind: 'gold', tx: w.tx, out: w.out }); }
   if (s.usdL) { const w = await swapTx(wallet, USDC, s.usdL, vu.ata); out.txs.push({ kind: 'dollars', tx: w.tx, out: w.out }); }
   if (betMarket) { const w = await swapTx(wallet, USDC, s.betL, null); out.txs.push({ kind: 'bet-usdc', tx: w.tx, out: w.out }); out.bet = { market: betMarket, usdc: Math.floor(Math.min(+w.out, MIN_BET_USD * 1e6) * .995) }; }
@@ -116,6 +120,7 @@ async function topup(req) {
   if (!(sol >= .01 && sol <= 50)) throw bad('pick an amount between 0.01 and 50 SOL');
   const a = await rpc(c => c.getAccountInfo(asset)); if (!a || !a.owner.equals(CORE)) throw bad('that is not a mint');
   const v = await vaultOf(asset, what); const pre = await legacy(wallet, [createAssociatedTokenAccountIdempotentInstruction(wallet, v.ata, signerOf(asset), new PublicKey(what), v.program)]);
+  if (b.client) return { txs: [{ kind: 'vault', tx: b64(pre) }], vault: v.ata.toBase58(), mint: what, lamports: Math.floor(sol * 1e9) };
   const w = await swapTx(wallet, what, Math.floor(sol * 1e9), v.ata); return { txs: [{ kind: 'vault', tx: b64(pre) }, { kind: what === GOLD ? 'gold' : 'dollars', tx: w.tx }] };
 }
 
@@ -212,7 +217,7 @@ module.exports = async (req, res) => {
     else if (a === 'topup') out = await topup(req);
     else if (a === 'redeem') out = await redeem(req);
     else if (a === 'send') out = await send(req);
-    else if (a === 'selftest') out = await selftest(q);
+    else if (a === 'selftest') { out = await selftest(q); res.setHeader('cache-control', 's-maxage=300, stale-while-revalidate=600'); }
     else if (a === 'gallery') { out = { items: await index(+q.limit || 120) }; res.setHeader('cache-control', 's-maxage=15, stale-while-revalidate=45'); }
     else if (a === 'mine') { const w = pk(q.wallet).toBase58(); const [items, pos] = await Promise.all([index(400), positions(w)]); out = { items: items.filter(x => x.owner === w), positions: pos }; }
     else if (a === 'meta') { const id = pk(q.id).toBase58(), n = +q.n || 0; const host = req.headers['x-forwarded-host'] || req.headers.host;
