@@ -37,47 +37,67 @@
   function drawMarks() { $$('canvas.leafmark').forEach(c => { const wm = c.parentElement.querySelector('.wm'); const css = wm ? Math.round(parseFloat(getComputedStyle(wm).fontSize) * .74) : +c.dataset.size;
     const g = sizeCanvas(c, css * 1.06, css * 1.06); c.style.width = css * 1.06 + 'px'; c.style.height = css * 1.06 + 'px'; A.leaf(g, 0, 0, css, { body: C.ink, rib: C.mintL, shadow: css > 40 ? C.mintS : null }); }); }
 
-  // ---------------------------------------------------------------- the intro (about 4.5 s), smooth and quiet: a bear tile fades in and
-  // gets its ▼, turns over into the leaf, the leaf settles, "Mint" rises in beside it, the line fades in, and the logo glides into the page
+  // ---------------------------------------------------------------- the intro (about 6 s): a neat wall of Wall Street bears builds out from
+  // the centre; a red ▼ wave runs across it (the market falls); then a flip wave turns every bear into a leaf (the hedge); the wall
+  // melts away into the centre, the last leaf grows into the logo, "Mint" rises in beside it, and the logo glides into the page
   function intro(done) {
     const cv = $('#intro'); if (RM || location.hash || scrollY > 10 || document.hidden) { cv.remove(); document.body.classList.remove('intro-on'); return done(); }
-    setTimeout(() => { if (document.body.contains(cv)) { cv.remove(); document.body.classList.remove('intro-on', 'handoff'); } }, 11000); // never leave the page behind a stuck intro
+    setTimeout(() => { if (document.body.contains(cv)) { cv.remove(); document.body.classList.remove('intro-on', 'handoff'); } }, 12000); // never leave the page behind a stuck intro
     history.scrollRestoration = 'manual'; scrollTo(0, 0);
     const W = innerWidth, H = innerHeight, g = sizeCanvas(cv, W, H); cv.style.width = W + 'px'; cv.style.height = H + 'px';
     const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), out = t => 1 - Math.pow(1 - t, 3), io = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, sm = t => t * t * (3 - 2 * t);
+    const back = t => { const c1 = 1.2, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+    // the wall: square tiles, centred, one tile exactly in the middle
+    const ts = Math.round(Math.max(44, Math.min(W, H) / 8.2)), gap = Math.round(ts * .26), step = ts + gap;
+    const cols = 2 * Math.ceil((W / 2) / step) + 1, rows = 2 * Math.ceil((H / 2) / step) + 1, cx0 = W / 2, cy0 = H / 2, r = A.rng(23), maxD = Math.hypot(W / 2, H / 2);
+    const SPECS = Array.from({ length: 8 }, () => A.bearSpec(r)), sprites = {};
+    function sprite(key, draw) { if (sprites[key]) return sprites[key]; const c = document.createElement('canvas'), s = Math.ceil(ts * 1.12 * DPR); c.width = c.height = s; const x = c.getContext('2d'); x.scale(DPR, DPR); draw(x, ts * .06); return sprites[key] = c; }
+    const bearS = (ci, si, badge) => sprite(`b${ci}-${si}-${badge}`, (x, o) => A.tile(x, o, o, ts, C.rows[ci], SPECS[si], { badge }));
+    const leafS = () => sprite('leaf', (x, o) => { A.rr(x, o - ts * .05, o - ts * .05, ts * 1.1, ts * 1.1, ts * .21); x.fillStyle = '#fff'; x.fill(); A.rr(x, o, o, ts, ts, ts * .16); x.fillStyle = C.mintL; x.fill(); A.leaf(x, o + ts * .17, o + ts * .17, ts * .66, { body: C.ink, rib: C.mintL, shadow: 'rgba(12,21,18,.18)', off: ts * .03 }); });
+    const tiles = []; for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) { const x = cx0 + (i - (cols - 1) / 2) * step, y = cy0 + (j - (rows - 1) / 2) * step, d = Math.hypot(x - cx0, y - cy0) / maxD;
+      tiles.push({ x, y, d, ci: (j + Math.floor(rows / 2) * 6) % 6, si: Math.floor(r() * 8), centre: i === (cols - 1) / 2 && j === (rows - 1) / 2, wave: (x + ts / 2) / W, jit: r() * 120 }); }
+    // the logo
     const NAME = 'Mint', TAG = 'the NFT that hedges against the stock market';
-    const L = Math.min(W * .16, H * .21), F = L / .74; g.font = `700 ${F}px ID`; const ww = g.measureText(NAME).width, gapL = L * .14, lockW = L * 1.06 + gapL + ww;
-    const lx = (W - lockW) / 2, ly = H * .46 - L / 2, cx0 = W / 2, cy0 = H * .46, TS = L * 1.2, spec = A.bearSpec(A.rng(11));
-    let t0 = performance.now(), handoff = null, finished = false; const said = {}; const once = (k, n) => { if (!said[k]) { said[k] = 1; cue(n); } };
-    const skip = () => { if (!handoff && performance.now() - t0 < 3500) t0 = performance.now() - 3500; };
+    const L = Math.min(W * .16, H * .21), F = L / .74; g.font = `700 ${F}px ID`; const ww = g.measureText(NAME).width, gapL = L * .14, lockW = L * 1.06 + gapL + ww, lx = (W - lockW) / 2, ly = cy0 - L / 2;
+    let t0 = performance.now(), handoff = null, finished = false, lastTick = 0; const said = {}; const once = (k, n) => { if (!said[k]) { said[k] = 1; cue(n); } };
+    const tickSoft = now => { if (now - lastTick > 70) { lastTick = now; cue('tick'); } };
+    const skip = () => { if (!handoff && performance.now() - t0 < 4500) t0 = performance.now() - 4500; };
     addEventListener('pointerdown', skip, { once: true }); addEventListener('keydown', skip, { once: true });
+    const T_IN = 0, T_DOWN = 1000, T_FLIP = 1900, T_MELT = 3150, T_GROW = 3350, T_NAME = 4000, T_TAG = 4500, T_GO = 5350;
     function frame(now) {
       const t = now - t0; g.setTransform(DPR, 0, 0, DPR, 0, 0); g.clearRect(0, 0, W, H);
-      if (t > 3900 && !handoff) { const tl = $('#heroLeaf').getBoundingClientRect(); handoff = { t: now, x: tl.left, y: tl.top, s: (tl.width / 1.06) / L }; document.body.classList.add('handoff'); document.body.classList.remove('intro-on'); }
+      if (t > T_GO && !handoff) { const tl = $('#heroLeaf').getBoundingClientRect(); handoff = { t: now, x: tl.left, y: tl.top, s: (tl.width / 1.06) / L }; document.body.classList.add('handoff'); document.body.classList.remove('intro-on'); }
       let bgA = 1, X = lx, Y = ly, sc = 1;
       if (handoff) { const k = clamp((now - handoff.t) / 1100), e = io(k); bgA = 1 - sm(clamp((k - .35) / .65)); X = lx + (handoff.x - lx) * e; Y = ly + (handoff.y - ly) * e; sc = 1 + (handoff.s - 1) * e;
         if (k >= 1 && !finished) { finished = true; document.body.classList.remove('handoff'); cv.remove(); return done(); } }
       g.globalAlpha = bgA; g.fillStyle = C.mint; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
-      // 1 · the bear tile: fades up into place, gets its ▼, turns over (0 – 1.5 s)
-      const kf = clamp((t - 950) / 620), turn = io(kf), sx = Math.abs(Math.cos(turn * Math.PI)), back = turn >= .5;
-      if (!handoff && t < 1900) { const kin = out(clamp(t / 650)), fadeOut = sm(clamp((t - 1500) / 380));
-        g.save(); g.globalAlpha = kin * (1 - fadeOut); g.translate(cx0, cy0 + (1 - kin) * 24); g.scale(Math.max(.02, kf > 0 ? sx : 1) * (.92 + .08 * kin), .92 + .08 * kin);
-        if (!back) A.tile(g, -TS / 2, -TS / 2, TS, C.rows[0], spec, { badge: t > 520, blink: t > 380 && t < 460 });
-        else { A.rr(g, -TS / 2 - TS * .05, -TS / 2 - TS * .05, TS * 1.1, TS * 1.1, TS * .21); g.fillStyle = '#fff'; g.fill(); A.rr(g, -TS / 2, -TS / 2, TS, TS, TS * .16); g.fillStyle = C.mintL; g.fill(); }
-        g.restore(); if (t > 520) once('b', 'pop'); }
-      // 2 · the leaf: on the back of the tile, then settling to full size and gliding left to make room for the name
-      if (back || handoff) { const kg = handoff ? 1 : io(clamp((t - 1350) / 750)), s0 = TS * .6, size = (s0 + (L - s0) * kg) * sc;
-        const mk = handoff ? 1 : io(clamp((t - 1900) / 800)), sx0 = cx0 - size / 2, sy0 = cy0 - size / 2, px = handoff ? X : sx0 + (lx - sx0) * mk, py = handoff ? Y : sy0 + (ly - sy0) * mk;
-        const turning = !handoff && kf < 1; if (turning) { g.save(); g.translate(cx0, 0); g.scale(Math.max(.02, sx), 1); g.translate(-cx0, 0); }
-        const shK = handoff ? 1 : sm(clamp((t - 1800) / 500)), off = size * .05;
+      // the wall
+      const zoom = 1.07 - .07 * io(clamp(t / 3000)); if (!handoff) { g.save(); g.translate(cx0, cy0); g.scale(zoom, zoom); g.translate(-cx0, -cy0); }
+      if (!handoff && t < T_GROW + 700) for (const T of tiles) {
+        const kin = clamp((t - T_IN - T.d * 700) / 480); if (kin <= 0) continue;
+        const kd = clamp((t - T_DOWN - T.wave * 600 - T.jit * .5) / 360), badge = kd > .25, dip = Math.sin(clamp(kd) * Math.PI) * ts * .07 + (kd >= 1 ? 0 : 0);
+        const kf = clamp((t - T_FLIP - T.d * 800 - T.jit) / 420), flipX = Math.abs(Math.cos(io(kf) * Math.PI)), isLeaf = kf >= .5;
+        if (kf > .5 && !T.f) { T.f = 1; tickSoft(now); }
+        const km = T.centre ? 0 : clamp((t - T_MELT - (1 - T.d) * 450) / 420), melt = sm(km); if (km >= 1) continue;
+        const s = back(kin) * (1 - melt * .7), a = Math.min(1, kin * 2) * (1 - melt) * (T.centre && t > T_GROW ? 1 - sm(clamp((t - T_GROW) / 300)) : 1);
+        const mx = T.x + (cx0 - T.x) * melt * .35, my = T.y + (cy0 - T.y) * melt * .35 + dip;
+        g.save(); g.globalAlpha = a; g.translate(mx, my); g.scale(s * Math.max(.02, kf > 0 && kf < 1 ? flipX : 1), s); const spr = isLeaf ? leafS() : bearS(T.ci, T.si, badge);
+        g.drawImage(spr, -ts * .56, -ts * .56, ts * 1.12, ts * 1.12);
+        if (kd > 0 && kd < 1 && !isLeaf) { g.globalAlpha = a * .5 * Math.sin(kd * Math.PI); A.rr(g, -ts / 2, -ts / 2, ts, ts, ts * .16); g.fillStyle = C.coral; g.fill(); }
+        g.restore(); }
+      if (!handoff) g.restore();
+      if (t > T_DOWN && t < T_DOWN + 900) once('down', 'thud');
+      // the logo grows out of the centre tile
+      if (t > T_GROW || handoff) { const kg = handoff ? 1 : io(clamp((t - T_GROW) / 700)), s0 = ts * .66, size = (s0 + (L - s0) * kg) * sc;
+        const mk = handoff ? 1 : io(clamp((t - T_GROW - 350) / 750)), sx0 = cx0 - size / 2, sy0 = cy0 - size / 2, px = handoff ? X : sx0 + (lx - sx0) * mk, py = handoff ? Y : sy0 + (ly - sy0) * mk;
+        const shK = handoff ? 1 : sm(clamp((t - T_GROW - 300) / 500)), off = size * .05;
         if (shK > 0) { g.globalAlpha = shK; A.leaf(g, px + off * shK, py + off * shK, size, { body: C.mintS, rib: C.mintS, shadow: null }); g.globalAlpha = 1; }
-        A.leaf(g, px, py, size, { body: C.ink, rib: C.mintL, shadow: null }); if (turning) g.restore(); if (kg > .9) once('l', 'chime');
-        // 3 · the name rises in, letter by letter; the line fades in under it
+        A.leaf(g, px, py, size, { body: C.ink, rib: C.mintL, shadow: null }); if (kg > .95) once('chime', 'chime');
+        if (!handoff && t > T_GROW + 500 && t < T_GROW + 1300) { const k = (t - T_GROW - 500) / 800, P = size / 16; g.fillStyle = '#ffffff'; for (const [x, y, kk] of A.LEAF) if (kk === 'r' && Math.abs((15 - y) / 15 - k) < .09) g.fillRect(px + x * P, py + y * P, P + .4, P + .4); }
         const fs = F * sc; g.font = `700 ${fs}px ID`; g.textBaseline = 'middle'; g.textAlign = 'left'; let wx = px + (L * 1.06 + gapL) * sc; const wy = py + size * .5 - fs * .04;
-        [...NAME].forEach((ch, i) => { const k = handoff ? 1 : out(clamp((t - 2350 - i * 80) / 520)), cw = g.measureText(ch).width; if (k > 0) { const dy = (1 - k) * fs * .28;
+        [...NAME].forEach((ch, i) => { const k = handoff ? 1 : out(clamp((t - T_NAME - i * 85) / 520)), cw = g.measureText(ch).width; if (k > 0) { const dy = (1 - k) * fs * .3;
           g.globalAlpha = k; g.fillStyle = C.mintS; g.fillText(ch, wx + fs * .045, wy + dy + fs * .045); g.fillStyle = C.ink; g.fillText(ch, wx, wy + dy); g.globalAlpha = 1; } wx += cw; });
-        if (!handoff) { const k = sm(clamp((t - 2950) / 600)); if (k > 0) { g.globalAlpha = k * .85; g.font = `500 ${Math.max(13, F * .12)}px JB`; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = C.ink; g.fillText(TAG, W / 2, ly + L + L * .3 + (1 - k) * 8); g.globalAlpha = 1; } }
-        else { const k = 1 - clamp((now - handoff.t) / 350); if (k > 0) { g.globalAlpha = k * .85; g.font = `500 ${Math.max(13, F * .12)}px JB`; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = C.ink; g.fillText(TAG, W / 2, ly + L + L * .3); g.globalAlpha = 1; } } }
+        const kt = handoff ? 1 - clamp((now - handoff.t) / 350) : sm(clamp((t - T_TAG) / 600)); if (kt > 0) { g.globalAlpha = kt * .85; g.font = `500 ${Math.max(13, F * .12)}px JB`; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = C.ink; g.fillText(TAG, W / 2, ly + L + L * .3 + (handoff ? 0 : (1 - kt) * 8)); g.globalAlpha = 1; } }
       requestAnimationFrame(frame); }
     requestAnimationFrame(frame);
   }
@@ -159,11 +179,14 @@
     if (cm) { S.closes = cm.closes; if (cm.volume) { $('#cvol').textContent = usd(cm.volume, 0); $('#bsVol').textContent = big(cm.volume); } if (cm.rules) $('#rules').textContent = cm.rules.split('\n\n').slice(0, 2).join('\n\n'); if (cm.slug) $('#plink').href = 'https://polymarket.com/event/' + cm.slug;
       if (cm.volume) $('#crashSrc').innerHTML = `Live from Polymarket's “${esc(cm.title)}” via Jupiter. A bet costs the YES price per $1 it pays, and resolves on Polymarket's rules.`; }
     MINTFX.tween($('#hsMints'), S.mints, x => Math.round(x).toLocaleString('en-US')); MINTFX.tween($('#bsMints'), S.mints, x => Math.round(x).toLocaleString('en-US'));
+    const setF = (id, v, c) => { const el = $(id); if (!el) return; el.textContent = v; if (c !== undefined) el.className = c; };
+    if (P.spy) setF('#fx-spy', pct(P.spy.ch24), cls(P.spy.ch24)); if (P.gold) setF('#fx-gold', pct(P.gold.ch24), cls(P.gold.ch24)); if (P.sol) { setF('#fx-sol', pct(P.sol.ch24), cls(P.sol.ch24)); setF('#fx-solp', usd(P.sol.usd, 2)); }
+    if (cm) { if (cm.volume) setF('#fx-vol', big(cm.volume)); setF('#fx-lv', String(mk.length)); const ch = mk.slice().sort((a, b) => a.yes - b.yes)[0]; if (ch) setF('#fx-cheap', `${Math.round(ch.yes * 100)}¢ on ↓${lvl(ch.level)}`); }
     countdown(); updateQuote(); layerArt();
   }
   function countdown() { if (!S.closes) return; const ms = new Date(S.closes) - Date.now(); if (ms <= 0) { ['#cdown', '#bsClose'].forEach(i => $(i) && ($(i).textContent = 'closed')); return; }
     const d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4), sec = Math.floor(ms % 6e4 / 1e3), pad = n => String(n).padStart(2, '0');
-    $('#cdown').textContent = `${d}d ${pad(h)}h ${pad(m)}m ${pad(sec)}s`; $('#bsClose').textContent = `${d}d ${pad(h)}h ${pad(m)}m`; }
+    $('#cdown').textContent = `${d}d ${pad(h)}h ${pad(m)}m ${pad(sec)}s`; if ($('#fx-close')) $('#fx-close').textContent = `${d}d ${pad(h)}h ${pad(m)}m`; $('#bsClose').textContent = `${d}d ${pad(h)}h ${pad(m)}m`; }
   function renderLevels() {
     const mk = S.status.crash.markets;
     $('#levels').innerHTML = mk.map(m => `<button class="lv${m.id === S.market ? ' on' : ''}" data-id="${m.id}"><b>${lvl(m.level)}</b><span>YES ${usd(m.yes, 2)} · pays ${(1 / m.yes).toFixed(1)}×</span><span>$5.40 → ${usd(5.4 / m.yes, 2)}</span></button>`).join('');
@@ -231,7 +254,7 @@
     if (SW.sort === 'cap') it.sort((a, b) => (b.mcap || 0) - (a.mcap || 0)); if (SW.sort === 'az') it.sort((a, b) => a.s.localeCompare(b.s));
     if (SW.sort === 'move') it.sort((a, b) => (b.ch24 == null ? -1 : Math.abs(b.ch24)) - (a.ch24 == null ? -1 : Math.abs(a.ch24)));
     const moved = it.filter(x => x.ch24 != null), up = moved.filter(x => x.ch24 >= 0).length;
-    $('#swCount').textContent = `${it.length} stocks · ${up} up · ${moved.length - up} down`;
+    $('#swCount').textContent = `${it.length} stocks · ${up} up · ${moved.length - up} down`; if ($('#fx-stocks')) $('#fx-stocks').textContent = String(it.length); if ($('#fx-down')) $('#fx-down').textContent = moved.length ? `${moved.length - up} of ${moved.length}` : '—';
     const shade = c => c == null ? '' : c >= 0 ? (c > 2 ? 'u3' : c > .7 ? 'u2' : 'u1') : (c < -2 ? 'd3' : c < -.7 ? 'd2' : 'd1');
     const cap = x => x >= 1e12 ? '$' + (x / 1e12).toFixed(2) + 'T' : x >= 1e9 ? '$' + (x / 1e9).toFixed(1) + 'B' : x >= 1e6 ? '$' + (x / 1e6).toFixed(0) + 'M' : '';
     $('#swall').innerHTML = it.map((x, i) => { const r = rank.get(x.id), size = SW.sort === 'cap' ? (r < 4 ? 'sz4' : r < 14 ? 'sz2' : '') : '';
@@ -333,7 +356,7 @@
   async function loadGallery() {
     try { const { items } = await api('gallery'); S.gallery = items; const live = items.filter(x => x.alive); if (items.length > S.mints) S.mints = items.length;
       renderGallery(); const gsum = live.reduce((a, x) => a + x.gold, 0), usum = live.reduce((a, x) => a + x.usd, 0), tvl = gsum * goldUsd() + usum;
-      MINTFX.tween($('#hsVault'), tvl, x => usd(x, 2)); MINTFX.tween($('#bsTvl'), tvl, x => usd(x, 2)); $('#bsGold').textContent = gsum.toFixed(4); $('#bsUsd').textContent = usd(usum, 2);
+      MINTFX.tween($('#hsVault'), tvl, x => usd(x, 2)); MINTFX.tween($('#fx-tvl'), tvl, x => usd(x, 2)); MINTFX.tween($('#fx-mints'), S.mints, x => Math.round(x).toLocaleString('en-US')); MINTFX.tween($('#bsTvl'), tvl, x => usd(x, 2)); $('#bsGold').textContent = gsum.toFixed(4); $('#bsUsd').textContent = usd(usum, 2);
       MINTFX.tween($('#hsMints'), S.mints, x => Math.round(x).toLocaleString('en-US')); MINTFX.tween($('#bsMints'), S.mints, x => Math.round(x).toLocaleString('en-US'));
       $('#feed').innerHTML = items.length ? `<div class="flist">${items.slice(0, 6).map(x => `<a class="frow" href="https://solscan.io/token/${x.asset}" target="_blank" rel="noopener"><img src="${img(x)}" alt=""><span><b>${esc(x.name)}</b><i>${short(x.minter)} · ${ago(x.time)}</i></span><em>${x.alive ? usd(x.gold * goldUsd() + x.usd, 2) : 'redeemed'}</em></a>`).join('')}</div>` : '<div class="skel">No mints yet. The first one shows up here within seconds.</div>';
     } catch (e) { $('#galleryGrid').innerHTML = `<div class="empty">couldn't read the chain right now (${esc(e.message)}). Try again in a minute.</div>`; $('#feed').innerHTML = '<div class="skel">the chain is busy, retrying soon</div>'; }
