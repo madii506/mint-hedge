@@ -6,6 +6,7 @@
   const DPR = Math.min(2, window.devicePixelRatio || 1);
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const BNBY = '#f0b90b';
+  const DK = { bg: '#0d0d0c', text: '#f2f2ee', mute: '#8a8a83', leafSh: '#0a4d38', gold: '#e3b44f', yInk: '#1a1400' }; // the dark palette, for everything drawn on canvas
   const RPCS = ['https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io', 'https://bsc-rpc.publicnode.com'];
   const KY = 'https://aggregator-api.kyberswap.com/bsc/api/v1', GT = 'https://api.geckoterminal.com/api/v2/networks/bsc';
   const NATIVE = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', ROUTER = '0x6131B5fae19EA4f9D964eAc0408E4408b66337b5';
@@ -44,7 +45,7 @@
 
   // ---------------------------------------------------------------- leaf marks
   function drawMarks() { $$('canvas.leafmark').forEach(c => { const wm = c.parentElement.querySelector('.wm'); const css = wm ? Math.round(parseFloat(getComputedStyle(wm).fontSize) * .74) : +c.dataset.size;
-    const g = sizeCanvas(c, css * 1.06, css * 1.06); c.style.width = css * 1.06 + 'px'; c.style.height = css * 1.06 + 'px'; A.leaf(g, 0, 0, css, { body: C.ink, rib: C.mintL, shadow: css > 40 ? C.mintS : null }); }); }
+    const g = sizeCanvas(c, css * 1.06, css * 1.06); c.style.width = css * 1.06 + 'px'; c.style.height = css * 1.06 + 'px'; A.leaf(g, 0, 0, css, { body: C.mint, rib: '#0c1512', shadow: css > 40 ? DK.leafSh : null }); }); }
 
   // ---------------------------------------------------------------- the intro (about 6 s), the same film as the Solana site, ending on "on BNB Chain"
   function intro(done) {
@@ -77,7 +78,7 @@
       let bgA = 1, X = lx, Y = ly, sc = 1;
       if (handoff) { const k = clamp((now - handoff.t) / 1100), e = io(k); bgA = 1 - sm(clamp((k - .35) / .65)); X = lx + (handoff.x - lx) * e; Y = ly + (handoff.y - ly) * e; sc = 1 + (handoff.s - 1) * e;
         if (k >= 1 && !finished) { finished = true; document.body.classList.remove('handoff'); cv.remove(); return done(); } }
-      g.globalAlpha = bgA; g.fillStyle = C.mint; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
+      g.globalAlpha = bgA; g.fillStyle = DK.bg; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
       // the wall
       const zoom = 1.07 - .07 * io(clamp(t / 3000)); if (!handoff) { g.save(); g.translate(cx0, cy0); g.scale(zoom, zoom); g.translate(-cx0, -cy0); }
       if (!handoff && t < T_GROW + 700) for (const T of tiles) {
@@ -98,17 +99,17 @@
       if (t > T_GROW || handoff) { const kg = handoff ? 1 : io(clamp((t - T_GROW) / 700)), s0 = ts * .66, size = (s0 + (L - s0) * kg) * sc;
         const mk = handoff ? 1 : io(clamp((t - T_GROW - 350) / 750)), sx0 = cx0 - size / 2, sy0 = cy0 - size / 2, px = handoff ? X : sx0 + (lx - sx0) * mk, py = handoff ? Y : sy0 + (ly - sy0) * mk;
         const shK = handoff ? 1 : sm(clamp((t - T_GROW - 300) / 500)), off = size * .05;
-        if (shK > 0) { g.globalAlpha = shK; A.leaf(g, px + off * shK, py + off * shK, size, { body: C.mintS, rib: C.mintS, shadow: null }); g.globalAlpha = 1; }
-        A.leaf(g, px, py, size, { body: C.ink, rib: C.mintL, shadow: null }); if (kg > .95) once('chime', 'chime');
+        if (shK > 0) { g.globalAlpha = shK; A.leaf(g, px + off * shK, py + off * shK, size, { body: DK.leafSh, rib: DK.leafSh, shadow: null }); g.globalAlpha = 1; }
+        A.leaf(g, px, py, size, { body: C.mint, rib: '#0c1512', shadow: null }); if (kg > .95) once('chime', 'chime');
         if (!handoff && t > T_GROW + 500 && t < T_GROW + 1300) { const k = (t - T_GROW - 500) / 800, P = size / 16; g.fillStyle = '#ffffff'; for (const [x, y, kk] of A.LEAF) if (kk === 'r' && Math.abs((15 - y) / 15 - k) < .09) g.fillRect(px + x * P, py + y * P, P + .4, P + .4); }
         const fs = F * sc; g.font = `700 ${fs}px ID`; g.textBaseline = 'middle'; g.textAlign = 'left'; let wx = px + (L * 1.06 + gapL) * sc; const wy = py + size * .5 - fs * .04;
         [...NAME].forEach((ch, i) => { const k = handoff ? 1 : out(clamp((t - T_NAME - i * 85) / 520)), cw = g.measureText(ch).width; if (k > 0) { const dy = (1 - k) * fs * .3;
-          g.globalAlpha = k; g.fillStyle = C.mintS; g.fillText(ch, wx + fs * .045, wy + dy + fs * .045); g.fillStyle = C.ink; g.fillText(ch, wx, wy + dy); g.globalAlpha = 1; } wx += cw; });
-        const kt = handoff ? 1 - clamp((now - handoff.t) / 350) : sm(clamp((t - T_TAG) / 600)); if (kt > 0) { g.globalAlpha = kt * .85; const tf = Math.max(13, Math.min(F * .12, (W - 32) / (TAG.length * .62))); g.font = `500 ${tf}px JB`; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = C.ink; const ty = ly + L + L * .3 + (handoff ? 0 : (1 - kt) * 8); g.fillText(TAG, W / 2, ty);
+          g.globalAlpha = k; g.fillStyle = DK.leafSh; g.fillText(ch, wx + fs * .045, wy + dy + fs * .045); g.fillStyle = DK.text; g.fillText(ch, wx, wy + dy); g.globalAlpha = 1; } wx += cw; });
+        const kt = handoff ? 1 - clamp((now - handoff.t) / 350) : sm(clamp((t - T_TAG) / 600)); if (kt > 0) { g.globalAlpha = kt * .85; const tf = Math.max(13, Math.min(F * .12, (W - 32) / (TAG.length * .62))); g.font = `500 ${tf}px JB`; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = DK.text; const ty = ly + L + L * .3 + (handoff ? 0 : (1 - kt) * 8); g.fillText(TAG, W / 2, ty);
           const pf = Math.max(13, tf * 1.05), pw = g.measureText('on BNB Chain').width * (pf / tf) + pf * 1.6, ph = pf * 1.9, pxl = W / 2 - pw / 2, pyl = ty + tf * 1.9, pcy = pyl + ph / 2;
           const kp = handoff ? 1 : clamp((t - T_TAG - 250) / 450), psc = handoff ? 1 : back(kp); if (kp > 0) { once('bnb', 'pop'); g.save(); g.globalAlpha = handoff ? kt : Math.min(1, kp * 3); g.translate(W / 2, pcy); g.scale(psc, psc); g.translate(-W / 2, -pcy);
-            A.rr(g, pxl + 3, pyl + 3, pw, ph, ph / 2); g.fillStyle = C.ink; g.fill(); A.rr(g, pxl, pyl, pw, ph, ph / 2); g.fillStyle = BNBY; g.fill(); g.lineWidth = 2; g.strokeStyle = C.ink; g.stroke();
-            g.font = `700 ${pf}px JB`; g.fillStyle = C.ink; g.textBaseline = 'middle'; g.fillText('on BNB Chain', W / 2, pcy + 1); g.restore(); } g.globalAlpha = 1; } }
+            A.rr(g, pxl, pyl + 4, pw, ph, ph / 2); g.fillStyle = 'rgba(240,185,11,.22)'; g.fill(); A.rr(g, pxl, pyl, pw, ph, ph / 2); g.fillStyle = BNBY; g.fill();
+            g.font = `700 ${pf}px JB`; g.fillStyle = DK.yInk; g.textBaseline = 'middle'; g.fillText('on BNB Chain', W / 2, pcy + 1); g.restore(); } g.globalAlpha = 1; } }
       requestAnimationFrame(frame); }
     requestAnimationFrame(frame);
   }
@@ -221,8 +222,8 @@
     drawSpark($('#whySpark'), s); $$('.bt-spark').forEach(c => drawMini(c, s[c.dataset.h])); CH.data = s; CH.t0 = 0; }
   function drawSpark(c, s) { if (!c) return; const w = c.clientWidth || 300, h = c.clientHeight || 80, g = sizeCanvas(c, w, h); g.imageSmoothingEnabled = true;
     const all = [...s.spy, ...s.gold, ...s.mint], mn = Math.min(...all), mx = Math.max(...all), Y = v => h - 6 - (v - mn) / (mx - mn || 1) * (h - 12), X = i => i / (s.spy.length - 1) * w;
-    g.strokeStyle = 'rgba(12,21,18,.2)'; g.setLineDash([3, 4]); g.beginPath(); g.moveTo(0, Y(0)); g.lineTo(w, Y(0)); g.stroke(); g.setLineDash([]);
-    [['spy', C.coral], ['gold', C.goldD], ['mint', C.ink]].forEach(([k, col]) => { g.strokeStyle = col; g.lineWidth = k === 'mint' ? 3 : 2.2; g.beginPath(); s[k].forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v))); g.stroke(); }); }
+    g.strokeStyle = 'rgba(242,242,238,.18)'; g.setLineDash([3, 4]); g.beginPath(); g.moveTo(0, Y(0)); g.lineTo(w, Y(0)); g.stroke(); g.setLineDash([]);
+    [['spy', C.coral], ['gold', DK.gold], ['mint', C.mint]].forEach(([k, col]) => { g.strokeStyle = col; g.lineWidth = k === 'mint' ? 3 : 2.2; g.beginPath(); s[k].forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v))); g.stroke(); }); }
   function drawMini(c, arr) { if (!c || !arr) return; const w = c.clientWidth || 200, h = 40, g = sizeCanvas(c, w, h); g.imageSmoothingEnabled = true; const mn = Math.min(...arr), mx = Math.max(...arr), Y = v => h - 4 - (v - mn) / (mx - mn || 1) * (h - 8);
     const up = arr[arr.length - 1] >= 0, col = up ? C.mintD : C.coral; const grd = g.createLinearGradient(0, 0, 0, h); grd.addColorStop(0, up ? 'rgba(22,168,116,.25)' : 'rgba(255,90,95,.25)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
     g.beginPath(); arr.forEach((v, i) => { const x = i / (arr.length - 1) * w; i ? g.lineTo(x, Y(v)) : g.moveTo(x, Y(v)); }); g.lineTo(w, h); g.lineTo(0, h); g.closePath(); g.fillStyle = grd; g.fill();
@@ -234,13 +235,13 @@
     if (k >= 1 && CH.drawnHover === CH.hover && CH.drawnW === w) return; CH.drawnHover = k >= 1 ? CH.hover : null; CH.drawnW = w;
     const g = c.getContext('2d'); g.setTransform(DPR, 0, 0, DPR, 0, 0); g.clearRect(0, 0, w, h); const padL = 46, padR = 14, padT = 14, padB = 28, iw = w - padL - padR, ih = h - padT - padB;
     const all = [...s.spy, ...s.gold, ...s.mint, 0], mn = Math.floor(Math.min(...all)) - .5, mx = Math.ceil(Math.max(...all)) + .5, Y = v => padT + ih - (v - mn) / (mx - mn) * ih, X = i => padL + i / (s.spy.length - 1) * iw;
-    g.font = '500 11px JB'; g.fillStyle = 'rgba(12,21,18,.6)'; g.textAlign = 'right'; g.textBaseline = 'middle';
-    for (let v = Math.ceil(mn); v <= mx; v += Math.max(1, Math.round((mx - mn) / 5))) { g.strokeStyle = v === 0 ? 'rgba(12,21,18,.45)' : 'rgba(12,21,18,.1)'; g.lineWidth = 1; g.setLineDash(v === 0 ? [] : [3, 4]); g.beginPath(); g.moveTo(padL, Y(v)); g.lineTo(w - padR, Y(v)); g.stroke(); g.fillText((v > 0 ? '+' : '') + v + '%', padL - 8, Y(v)); }
+    g.font = '500 11px JB'; g.fillStyle = 'rgba(242,242,238,.5)'; g.textAlign = 'right'; g.textBaseline = 'middle';
+    for (let v = Math.ceil(mn); v <= mx; v += Math.max(1, Math.round((mx - mn) / 5))) { g.strokeStyle = v === 0 ? 'rgba(242,242,238,.35)' : 'rgba(242,242,238,.07)'; g.lineWidth = 1; g.setLineDash(v === 0 ? [] : [3, 4]); g.beginPath(); g.moveTo(padL, Y(v)); g.lineTo(w - padR, Y(v)); g.stroke(); g.fillText((v > 0 ? '+' : '') + v + '%', padL - 8, Y(v)); }
     g.setLineDash([]); g.textAlign = 'center'; g.textBaseline = 'top'; for (let i = 0; i < s.t.length; i += Math.ceil(s.t.length / 6)) { const d = new Date(s.t[i] * 1000); g.fillText(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), X(i), h - padB + 8); }
     const n = Math.max(2, Math.floor(k * s.spy.length));
-    [['spy', C.coral, 2.5], ['gold', C.goldD, 2.5], ['mint', C.ink, 4]].forEach(([key, col, lw]) => { g.strokeStyle = col; g.lineWidth = lw; g.lineJoin = 'round'; g.beginPath(); for (let i = 0; i < n; i++) i ? g.lineTo(X(i), Y(s[key][i])) : g.moveTo(X(i), Y(s[key][i])); g.stroke();
+    [['spy', C.coral, 2.5], ['gold', DK.gold, 2.5], ['mint', C.mint, 4]].forEach(([key, col, lw]) => { g.strokeStyle = col; g.lineWidth = lw; g.lineJoin = 'round'; g.beginPath(); for (let i = 0; i < n; i++) i ? g.lineTo(X(i), Y(s[key][i])) : g.moveTo(X(i), Y(s[key][i])); g.stroke();
       const v = s[key][n - 1]; g.fillStyle = col; g.beginPath(); g.arc(X(n - 1), Y(v), lw + 2, 0, 7); g.fill(); });
-    if (k >= 1) { const L = s.spy.length - 1; [['spy', C.coral], ['gold', C.goldD], ['mint', C.ink]].forEach(([key, col]) => { const v = s[key][L]; g.fillStyle = col; g.font = '700 12px JB'; g.textAlign = 'right'; g.textBaseline = 'bottom'; g.fillText(spct(v), X(L) - 8, Y(v) - 6); }); }
+    if (k >= 1) { const L = s.spy.length - 1; [['spy', C.coral], ['gold', DK.gold], ['mint', C.mint]].forEach(([key, col]) => { const v = s[key][L]; g.fillStyle = col; g.font = '700 12px JB'; g.textAlign = 'right'; g.textBaseline = 'bottom'; g.fillText(spct(v), X(L) - 8, Y(v) - 6); }); }
     const tip = $('#chartTip'); if (k >= 1 && CH.hover >= 0) { const i = CH.hover; g.strokeStyle = 'rgba(12,21,18,.5)'; g.lineWidth = 1; g.beginPath(); g.moveTo(X(i), padT); g.lineTo(X(i), padT + ih); g.stroke();
       tip.hidden = false; const d = new Date(s.t[i] * 1000); tip.innerHTML = `<b>${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</b><span class="spy">crash token ${spct(s.spy[i])}</span><span class="gold">gold ${spct(s.gold[i])}</span><span class="mint">Mint vault ${spct(s.mint[i])}</span>`;
       tip.style.left = Math.min(w - 170, Math.max(0, X(i) + 12)) + 'px'; } else if (tip) tip.hidden = true; }

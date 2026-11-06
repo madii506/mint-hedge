@@ -51,3 +51,111 @@ body.intro-on .deploybar { opacity: 0; }
 .fslot i { width: 34px; height: 34px; border-radius: 8px; border: 2px dashed rgba(12, 21, 18, .28); }
 .fslot span { display: flex; flex-direction: column; gap: 2px; font: 500 12.5px/1.2 var(--mono); opacity: .55; } .fslot b { font: 700 15px/1.1 var(--disp); } .fslot em { font-style: normal; }
 .gallery .empty .btn { margin-top: 14px; }
+
+/* ================================================================ dark: near-black like the BNB Chain trading sites, BNB yellow as the action colour, the Mint leaf stays mint */
+body.dark {
+  --bg: #0d0d0c; --card: #161615; --card-2: #1e1e1c; --line: #2a2a27; --line-2: #3a3a36; --text: #f2f2ee; --mute: #8a8a83; --y: #f0b90b; --y-ink: #1a1400; --y-bg: #2a2410;
+  --ink: var(--text); --ink-2: #a9a9a2; --paper: var(--card); --white: var(--card-2); --mint-xl: #22221f; --mint-s: #0a4d38;
+  --up: #3fe6a6; --down: #ff6b5e; --gold-d: #e3b44f;
+  --sh: 0 18px 40px rgba(0, 0, 0, .45); --sh-s: 0 10px 28px rgba(0, 0, 0, .35);
+  background: var(--bg); color: var(--text);
+}
+body.dark::before { opacity: .22; }
+body.dark ::selection { background: var(--y); color: var(--y-ink); }
+body.dark code { background: rgba(255, 255, 255, .07); }
+
+/* every card and control: soft lines instead of thick ink borders and hard offset shadows */
+body.dark .nav { background: rgba(22, 22, 21, .82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); }
+body.dark .steps li, body.dark .wcard, body.dark .bt, body.dark .bpanel, body.dark .card, body.dark .mrow, body.dark .why-live, body.dark .verdict, body.dark .verdict.v2,
+body.dark #crash .part, body.dark #crash .ladder-wrap, body.dark .machine, body.dark .modal-card { background: var(--card); color: var(--text); border: 1px solid var(--line); box-shadow: var(--sh-s); }
+body.dark .steps li:hover, body.dark .wcard:hover, body.dark .bt:hover { box-shadow: 0 14px 34px rgba(0, 0, 0, .5); border-color: var(--line-2); }
+body.dark .machine { box-shadow: var(--sh); }
+body.dark .m-out { background: #121211; border-color: var(--line); border-width: 0 0 0 1px; }
+@media (max-width: 900px) { body.dark .m-out { border-width: 1px 0 0 0; } }
+body.dark .sgrid div, body.dark .prow, body.dark .frow, body.dark .receipt, body.dark .progress li, body.dark .vaultviz, body.dark .preview, body.dark #whySpark, body.dark .obar,
+body.dark .chips button, body.dark .chips input, body.dark .gtools button, body.dark #walletList button, body.dark #walletList a, body.dark .legend span, body.dark .chain a, body.dark .kick-line, body.dark .why-live .kick-line,
+body.dark .bt-art, body.dark .card img, body.dark .mrow img, body.dark .mixbar, body.dark .snd, body.dark .scrollcue, body.dark .facts div, body.dark #crash .rung, body.dark .tape { border-color: var(--line); box-shadow: none; }
+body.dark .sgrid div, body.dark .prow, body.dark .frow, body.dark .chips button, body.dark .chips input, body.dark .gtools button, body.dark #walletList button, body.dark #walletList a, body.dark #crash .rung { background: var(--card-2); }
+body.dark .prow:hover, body.dark .frow:hover { background: #242421; }
+body.dark .facts div { background: var(--card); border-width: 1px; }
+body.dark .facts span { color: var(--mute); opacity: 1; }
+body.dark .receipt div { border-top-color: rgba(255, 255, 255, .08); }
+body.dark .tape { background: #121211; color: var(--text); border-block: 1px solid var(--line); }
+body.dark .tape-in span { border-right-color: var(--line); } body.dark .tape-in em { color: var(--text); }
+body.dark .chain a { background: transparent; border-width: 1px; } body.dark .chain a:hover { background: var(--y-bg); color: var(--y); border-color: rgba(240, 185, 11, .35); }
+body.dark .vaultviz { background: #121211; } body.dark .vv-l { color: var(--mute); } body.dark .vv-l .sw { border-color: var(--line-2); }
+body.dark #whySpark { background: #121211; }
+body.dark .preview { background: #121211; }
+body.dark .sw { border-color: rgba(0, 0, 0, .5); } body.dark .sw-paper { background: #f3f1ea; } body.dark .l-usd { background: #f3f1ea; }
+body.dark .layer { border-color: #0d0d0c; box-shadow: 12px 12px 30px rgba(0, 0, 0, .55); }
+body.dark .legend span { background: var(--card); } body.dark .legend span::before { border-top-color: var(--line-2); }
+
+/* the action colour */
+body.dark .btn { border: 1px solid var(--line-2); box-shadow: none; background: var(--card-2); color: var(--text); }
+body.dark .btn:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, .4); background: #262623; }
+body.dark .btn:active { box-shadow: none; }
+body.dark .btn-ink { background: var(--y); color: var(--y-ink); border-color: var(--y); }
+body.dark .btn-ink:hover { background: #ffc61a; }
+body.dark .btn-ink::after { background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .45), transparent); }
+body.dark .btn-line.btn-sm:hover, body.dark .btn-sm:hover { background: #262623; color: var(--text); }
+body.dark .btn-ink.btn-sm:hover { background: #ffc61a; color: var(--y-ink); }
+body.dark .nav-links a { color: var(--mute); } body.dark .nav-links a:hover { background: var(--card-2); color: var(--text); } body.dark .nav-links a.on { background: var(--y-bg); color: var(--y); }
+body.dark .kick { background: var(--y-bg); color: var(--y); border: 1px solid rgba(240, 185, 11, .22); }
+body.dark .wnum, body.dark .v-k, body.dark .verdict .v-k, body.dark .verdict.v2 .v-k { background: var(--y-bg); color: var(--y); }
+body.dark .steps li::before { background: var(--y-bg); color: var(--y); border: 1px solid rgba(240, 185, 11, .3); }
+body.dark .chips button.on, body.dark .gtools button.on { background: var(--y); color: var(--y-ink); border-color: var(--y); }
+body.dark #walletList button:hover { background: var(--y-bg); color: var(--y); }
+body.dark .scrollbar i { background: var(--y); }
+body.dark input[type=range]::-webkit-slider-runnable-track { background: var(--line-2); }
+body.dark input[type=range]::-moz-range-track { background: var(--line-2); }
+body.dark input[type=range]::-webkit-slider-thumb { background: var(--y); border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--y), 0 4px 12px rgba(0, 0, 0, .5); }
+body.dark input[type=range]::-moz-range-thumb { background: var(--y); border: 3px solid var(--bg); }
+body.dark .progress li i { border-color: var(--line-2); } body.dark .progress li.ok i { background: var(--up); } body.dark .progress li.run i { background: var(--y); }
+
+/* type */
+body.dark .lede, body.dark .sec-lede, body.dark .f-note, body.dark .wcard p, body.dark #crash .part p, body.dark .fine, body.dark .skel, body.dark .empty { color: var(--mute); }
+body.dark .fine, body.dark .skel, body.dark .empty { opacity: 1; }
+body.dark .sec-head h2, body.dark .sh-l h2 { text-shadow: .03em .03em 0 #4a3a06; }
+body.dark .lockup .wm { text-shadow: .045em .045em 0 #0a4d38; }
+body.dark .nav-brand b { color: var(--text); }
+body.dark .bt-px, body.dark .sgrid b, body.dark .wl-stat b { color: var(--text); }
+body.dark .bt-sub, body.dark .bt-liq, body.dark .sgrid span, body.dark .wl-stat span, body.dark .prow i, body.dark .mixlabels, body.dark .f-val, body.dark .c-s { color: var(--mute); opacity: 1; }
+body.dark .wl-stat.mint b { color: var(--up); }
+body.dark .lg.mint { color: var(--up); } body.dark .lg.gold { color: var(--gold-d); }
+body.dark .chart-tip { background: #0d0d0c; border: 1px solid var(--line-2); }
+body.dark .toast { background: var(--card-2); color: var(--text); border: 1px solid var(--line-2); box-shadow: 0 12px 30px rgba(0, 0, 0, .5); }
+body.dark .modal { background: rgba(0, 0, 0, .72); }
+body.dark .pv-tag { background: rgba(13, 13, 12, .82); }
+
+/* the machine */
+body.dark #mixUsd { background: #f3f1ea; border-left-color: var(--bg); background-image: none; }
+body.dark #mixShort { border-right-color: var(--bg); }
+body.dark .mflow { border-top-color: rgba(255, 255, 255, .1); }
+body.dark .mflow li::before { background: var(--y); color: var(--y-ink); border: 0; }
+body.dark .mvault { background: rgba(255, 255, 255, .04); border: 1px solid var(--line); color: var(--mute); } body.dark .mvault a { color: var(--y); }
+
+/* the payoff */
+body.dark #crash .ladder-wrap { color: var(--text); }
+body.dark #crash .ladder-wrap input[type=range]::-webkit-slider-runnable-track { background: var(--line-2); }
+body.dark #crash .ladder-wrap input[type=range]::-webkit-slider-thumb { background: var(--coral); border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--coral), 0 4px 12px rgba(0, 0, 0, .5); }
+body.dark #crash .rung .bar { background: var(--line); } body.dark #crash .rung .bar i { background: var(--up); }
+body.dark #crash .rung.hit { background: rgba(224, 74, 60, .1); border-color: rgba(224, 74, 60, .6); } body.dark #crash .rung.hit .bar i { background: var(--coral); } body.dark #crash .rung.hit .pay { color: var(--text); }
+body.dark #crash .rung.total { background: rgba(63, 230, 166, .07); border-color: rgba(63, 230, 166, .45); } body.dark #crash .rung.total .bar i { background: var(--up); }
+body.dark #crash .rung .pay em.up { color: var(--up); } body.dark #crash .rung .pay em.dn { color: var(--down); }
+body.dark #crash .part h3, body.dark #crash .fine { color: var(--text); } body.dark #crash .part h3 .sw { border-color: rgba(0, 0, 0, .5); }
+
+/* gallery, mine, empty states */
+body.dark .gallery .empty, body.dark .mine .empty { border: 1px dashed var(--line-2); background: rgba(255, 255, 255, .02); }
+body.dark .gallery .empty b { color: var(--text); }
+body.dark .fslot, body.dark .fslot i { border-color: rgba(255, 255, 255, .12); }
+body.dark .gtools span { color: var(--mute); }
+
+/* BNB pieces */
+body.dark .chainchip { border: 0; box-shadow: none; color: var(--y-ink); }
+body.dark .onbnb { border: 0; box-shadow: none; color: var(--y-ink); background: var(--y); }
+body.dark .deploybar { background: linear-gradient(90deg, #2a2410, #1e1a0c); color: var(--text); border: 1px solid rgba(240, 185, 11, .35); box-shadow: 0 10px 30px rgba(0, 0, 0, .4); }
+body.dark .deploybar b { color: var(--y); } body.dark .deploybar code { background: rgba(255, 255, 255, .07); color: var(--text); }
+body.dark .snd span, body.dark .scrollcue span { background: var(--mute); }
+body.dark input, body.dark select { color: var(--text); }
+body.dark .wl-stat b.up { color: var(--up); } body.dark .wl-stat b.dn { color: var(--down); }
+body.dark #crash .rung:last-child .bar i { background: #5b5b55; } body.dark #crash .rung:last-child { opacity: .8; }

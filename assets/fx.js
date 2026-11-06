@@ -1,6 +1,7 @@
 // mint motion: living section backgrounds, kinetic headlines, number tweens, a scroll bar, pixel leaves on click.
 (function () {
   const A = window.MINTART, C = A.C, RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const DARK = document.body.classList.contains('dark'), INK = DARK ? '#f2f2ee' : '#0c1512', INKR = DARK ? '242,242,238' : '12,21,18'; // pages on the dark theme draw light marks
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
   // ---------------------------------------------------------------- backgrounds: one small canvas per section, animated only while on screen
@@ -10,7 +11,7 @@
   const KINDS = {
     // drifting pixel leaves, rising slowly, swaying
     leaves(W, H, r) { const n = Math.round(W * H / 52000) + 6, P = []; for (let i = 0; i < n; i++) P.push({ x: r() * W, y: r() * H, s: [12, 16, 20, 28][Math.floor(r() * 4)], v: .12 + r() * .3, ph: r() * 6.3, a: .04 + r() * .07, rot: r() * 6.3, vr: (r() - .5) * .003 });
-      return (g, t) => { for (const p of P) { p.y -= p.v; p.rot += p.vr; if (p.y < -40) { p.y = H + 30; p.x = Math.random() * W; } const x = p.x + Math.sin(t / 2400 + p.ph) * 22; g.save(); g.globalAlpha = p.a; g.translate(x, p.y); g.rotate(p.rot); g.drawImage(leafSprite('#0c1512', p.s), -p.s / 2, -p.s / 2); g.restore(); } }; },
+      return (g, t) => { for (const p of P) { p.y -= p.v; p.rot += p.vr; if (p.y < -40) { p.y = H + 30; p.x = Math.random() * W; } const x = p.x + Math.sin(t / 2400 + p.ph) * 22; g.save(); g.globalAlpha = p.a; g.translate(x, p.y); g.rotate(p.rot); g.drawImage(leafSprite(INK, p.s), -p.s / 2, -p.s / 2); g.restore(); } }; },
     // gold and dollar pixels rising into an invisible vault
     gold(W, H, r) { const n = Math.round(W * H / 26000) + 10, P = []; for (let i = 0; i < n; i++) P.push({ x: r() * W, y: r() * H, s: 4 + Math.floor(r() * 3) * 3, v: .15 + r() * .35, c: r() < .55 ? C.gold : '#ffffff', a: .18 + r() * .25, tw: r() * 6.3 });
       return (g, t) => { for (const p of P) { p.y -= p.v; if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; } g.globalAlpha = p.a * (.6 + .4 * Math.sin(t / 500 + p.tw)); g.fillStyle = p.c; g.fillRect(p.x, p.y, p.s, p.s); if (p.s > 8) { g.fillStyle = 'rgba(12,21,18,.25)'; g.fillRect(p.x + 2, p.y + p.s, p.s, 2); } } g.globalAlpha = 1; }; },
@@ -23,10 +24,10 @@
     rain(W, H, r) { const n = Math.round(W * H / 70000) + 8, P = []; for (let i = 0; i < n; i++) P.push({ x: r() * W, y: r() * H, s: 5 + Math.floor(r() * 3) * 2, v: .25 + r() * .45, a: .07 + r() * .1, ph: r() * 6.3 });
       return (g, t) => { for (const p of P) { p.y += p.v; if (p.y > H + 10) { p.y = -10; p.x = Math.random() * W; } g.globalAlpha = p.a; A.down(g, p.x + Math.sin(t / 2600 + p.ph) * 10, p.y, p.s); } g.globalAlpha = 1; }; },
     // a dot grid with a slow mint sweep, like a terminal waking up
-    grid(W, H) { const s = 26; return (g, t) => { const sweep = (t / 14) % (W + 400) - 200; for (let y = s / 2; y < H; y += s) for (let x = s / 2; x < W; x += s) { const d = Math.abs(x - sweep), k = Math.max(0, 1 - d / 180); g.fillStyle = k > 0 ? `rgba(12,21,18,${.08 + k * .3})` : 'rgba(12,21,18,.08)'; const q = 2 + k * 3; g.fillRect(x - q / 2, y - q / 2, q, q); } }; },
+    grid(W, H) { const s = 26; return (g, t) => { const sweep = (t / 14) % (W + 400) - 200; for (let y = s / 2; y < H; y += s) for (let x = s / 2; x < W; x += s) { const d = Math.abs(x - sweep), k = Math.max(0, 1 - d / 180); g.fillStyle = k > 0 ? `rgba(${INKR},${.08 + k * .3})` : `rgba(${INKR},.08)`; const q = 2 + k * 3; g.fillRect(x - q / 2, y - q / 2, q, q); } }; },
     // small bear tiles drifting past behind the gallery, slowly turning into leaves
     parade(W, H, r) { const n = Math.round(W / 150) + 3, P = []; for (let i = 0; i < n; i++) P.push({ x: r() * W, y: 40 + r() * (H - 80), v: .15 + r() * .25, i, a: .1 + r() * .1, leaf: r() < .3 });
-      return (g) => { for (const p of P) { p.x += p.v; if (p.x > W + 50) { p.x = -50; p.y = 40 + Math.random() * (H - 80); p.leaf = Math.random() < .35; } g.globalAlpha = p.a; if (p.leaf) g.drawImage(leafSprite('#0c1512', 28), p.x - 14, p.y - 14); else g.drawImage(bearSprite(p.i), p.x - 20, p.y - 20); } g.globalAlpha = 1; }; },
+      return (g) => { for (const p of P) { p.x += p.v; if (p.x > W + 50) { p.x = -50; p.y = 40 + Math.random() * (H - 80); p.leaf = Math.random() < .35; } g.globalAlpha = p.a; if (p.leaf) g.drawImage(leafSprite(INK, 28), p.x - 14, p.y - 14); else g.drawImage(bearSprite(p.i), p.x - 20, p.y - 20); } g.globalAlpha = 1; }; },
   };
   const live = [];
   function bgInit() {
